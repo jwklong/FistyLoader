@@ -1,3 +1,4 @@
 **/*.exe
 game
 .vscode
+**/*.bak

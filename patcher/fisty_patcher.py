@@ -1,4 +1,4 @@
-from sys import stderr
+from genericpath import isfile
 from pefile import PE, SectionStructure
 
 def add_section_header(pe: PE, section_size: int):
@@ -37,18 +37,26 @@ def main():
     with open('custom_code.bin', 'rb') as f:
         section_content = f.read()
     
-    pe = PE("World of Goo 2.exe")
-    add_section_header(pe, len(section_content))
-    
-    print("Writing out.exe...")
-    pe.write("out.exe")
-    add_section_content("out.exe", section_content)
+    if not isfile('out.exe'):
+        print('Reading World of Goo 2.exe...')
+        pe = PE("World of Goo 2.exe")
+        
+        add_section_header(pe, len(section_content))
+        
+        print("Writing out.exe...")
+        pe.write("out.exe")
+        add_section_content("out.exe", section_content)
+    else:
+        print('out.exe exists already, only applying changes...')
+        
+        with open('out.exe', 'rb+') as f:
+            executable = f.read()
+            fisty_section_offset = int.from_bytes(executable[0x3e4:0x3e8], byteorder='little')
+            f.seek(fisty_section_offset)
+            f.write(section_content)
+            f.truncate(f.tell())
     
     print("Done.")
-    
-    # Load it again and print info
-    pe = PE("out.exe")
-    pe.print_info()
 
 if __name__ == '__main__':
     main()
