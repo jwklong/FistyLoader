@@ -1,4 +1,8 @@
 **/*.exe
-game
-.vscode
 **/*.bak
+
+.vscode
+game
+disasm
+
+patcher/custom_code.bin

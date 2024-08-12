@@ -1,4 +1,5 @@
-from genericpath import isfile
+from posixpath import dirname, isfile, join, realpath
+from sys import argv
 from pefile import PE, SectionStructure
 
 def add_section_header(pe: PE, section_size: int):
@@ -23,7 +24,9 @@ def add_section_header(pe: PE, section_size: int):
     section.PointerToLinenumbers = 0
     section.NumberOfRelocations = 0
     section.NumberOfLinenumbers = 0
-    section.Characteristics = 0x60000000
+    section.Characteristics = 0xE0000000 # rwx permissions
+    
+    print(f"Virtual address of new section: 0x{prev_section.VirtualAddress + prev_section.SizeOfRawData:x}")
     
     section.set_file_offset(0x3d0)
     pe.sections.append(section)
@@ -34,10 +37,11 @@ def add_section_content(filename: str, content: bytes):
         f.write(content)
 
 def main():
-    with open('custom_code.bin', 'rb') as f:
+    custom_code_path = join(dirname(realpath(argv[0])), 'custom_code.bin')
+    with open(custom_code_path, 'rb') as f:
         section_content = f.read()
     
-    if not isfile('out.exe'):
+    if not isfile('out.exe') or argv[1] in ['--clean', '-c']:
         print('Reading World of Goo 2.exe...')
         pe = PE("World of Goo 2.exe")
         
