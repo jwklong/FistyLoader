@@ -1,6 +1,7 @@
 **/*.exe
 **/*.bak
 
+__pycache__
 .vscode
 game
 disasm

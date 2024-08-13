@@ -2,10 +2,9 @@ from posixpath import dirname, isfile, join, realpath
 from sys import argv
 from pefile import PE, SectionStructure
 
+from hooks import patch_game
+
 def add_section_header(pe: PE, section_size: int):
-    print("Increasing section count...")
-    pe.FILE_HEADER.NumberOfSections += 1
-    
     print(f"Increasing image size by 0x{section_size:x}...")
     pe.OPTIONAL_HEADER.SizeOfImage += section_size
     
@@ -29,6 +28,8 @@ def add_section_header(pe: PE, section_size: int):
     print(f"Virtual address of new section: 0x{prev_section.VirtualAddress + prev_section.SizeOfRawData:x}")
     
     section.set_file_offset(0x3d0)
+    
+    pe.FILE_HEADER.NumberOfSections += 1
     pe.sections.append(section)
     pe.__structures__.append(section)
 
@@ -60,7 +61,8 @@ def main():
             f.write(section_content)
             f.truncate(f.tell())
     
-    print("Done.")
+    with open('out.exe', 'rb+') as f:
+        patch_game(f)
 
 if __name__ == '__main__':
     main()

@@ -12,28 +12,56 @@ msgLen equ $-msg
 
 ; runtime data
 alignb 8
-written resq 1
+written dq 0
 
-hello:
-    sub rsp, 8 + 32
-    mov ecx, -11
+; code
+env_init_hook:
+    push rcx
+    push rdx
+    push r8
+    push r9
+    push r12
     
-    ; GetStdHandle
-    call qword [0000000141A16538h]
+    sub rsp, 32
+    
+    mov ecx, -1
+    call qword [rel env_init_hook-0xA0AA8] ; AttachConsole
+    
+    mov ecx, 0xFFFFFFF6
+    call qword [rel env_init_hook-0xA0AE0] ; GetStdHandle
+    mov r12, rax
     
     mov qword [rel written], 0
     
     sub rsp, 8 + 8
-    mov rcx, rax
-    lea rdx, [rel msg]
+    mov rcx, r12
+    lea rdx, qword [rel msg]
     mov r8, msgLen
-    lea r9, [rel written]
-    mov qword [rsp + 4 * 8], NULL
-        
-    ; WriteFile
-    call qword [0000000141A164A8h]
+    lea r9, qword [rel written]
+    mov qword [rsp + 32], NULL
+    call qword [rel env_init_hook-0xA0B70] ; WriteFile
+    
+    call qword [rel env_init_hook-0xA0768] ; GetLastError
+    mov rcx, rax
+    lea rax, qword [rel env_init_hook-0x1417388] ; ExitProcess wrapper function
+    call rax
+    
+    
     add rsp, 48
-    ret
+    pop r12
+    pop r9
+    pop r8
+    pop rdx
+    pop rcx
+    
+    ; softbranch
+    push rbp
+    push rbx
+    push rsi
+    push rdi
+    
+    lea rax, qword [rel env_init_hook-0x182F6E3]
+    jmp rax
     
 ; in order to pad the file to the correct size (0x3000)
 section .ignoreme start=0x1ab9ffc

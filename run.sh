@@ -1,3 +1,1 @@
-nasm patch/main.s -o patcher/custom_code.bin
-python patcher/main.py "$1"
-./out.exe
+./build.sh "$1" && echo "Launching World of Goo 2..." && ./out.exe
