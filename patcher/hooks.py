@@ -13,5 +13,8 @@ def overwrite_bytes(file: BufferedRandom, virtual_address: int, replacement: byt
 def patch_game(file: BufferedRandom):
     print("Injecting hooks...")
     
-    # SDL2Environment::init -> call env_init_hook
-    overwrite_bytes(file, 0x140287930, bytes([0xe9, 0xE3, 0xF6, 0x82, 0x01]))
+    # SDL2Environment::init -> env_init_hook
+    # overwrite_bytes(file, 0x140287930, bytes([0xe9, 0xE3, 0xF6, 0x82, 0x01]))
+    
+    # SDL2Environment::loadConfig -> load_config_hook
+    overwrite_bytes(file, 0x140288a90, bytes([0xe9, 0xBD, 0xE5, 0x82, 0x01]))
