@@ -45,24 +45,9 @@ load_config_hook:
     mov rcx, rbx ; this
     lea rdx, [rel ballTablePath] ; filePath
     call qword [r12+0x8]
-    test al, al ; for some reason FileExists outputs in al only
-    jne load_config_hook_read_config ; skip the following code if ballTable.ini exists already and load the config instead
+    test al, al
+    je load_config_hook_create_balltable ; skip the following code if ballTable.ini exists already and load the config instead
     
-    ; Generate the config file
-    call create_ball_table
-    test rax, rax
-    je load_config_hook_merge
-    
-    ; SDL_ShowSimpleMessageBox
-    mov ecx, 0x40
-    lea rdx, [rel msgTitle]
-    lea r8, [rel msgBallTableCreateSuccess]
-    xor r9, r9
-    call load_config_hook-0x1AADD91
-    jmp load_config_hook_merge
-
-
-load_config_hook_read_config:
     ; storage passed in as rbx
     call load_ball_table
 
@@ -83,127 +68,74 @@ load_config_hook_merge:
     mov qword [rsp+0x10], rbx
     jmp load_config_hook-0x182E5AB
 
-
-%include "patch/ini_parse.s"
-
-
-; create_ball_table
-;
-; Creates ballTable.ini and extracts the default gooballIds table into it.
-;
-; Input: rbx - SDL2Storage* storage
-; Result: rax - bool success (1 if success, 0 if error)
-; Clobbers: ?
-create_ball_table:
-    push rbp
-    push r12
-    push rdi
-    push r13
+load_config_hook_create_balltable:
+    ; load vanilla gooball table into custom table
+    lea rax, [rel load_config_hook-0xF94B50]
+    mov qword [rel customGooballIds], rax
+    mov qword [rel gooballCount], baseGooballCount
     
-    mov rbp, rsp
-    sub rsp, 0x28 + 0x80 + 0x20
-    
-    mov r12, qword [rbx] ; r12 = storage->vtable
-    
-    ; SDL2Storage::FileOpen (vtable[2])
-    mov rcx, rbx ; this
-    lea rdx, [rel ballTablePath] ; filePath
-    mov r8, 0x22 ; flags (0x22 : "w+b")
-    lea r9, [rbp-0x10] ; out_fileHandle
-    call qword [r12+0x10]
-    
-    ; if (result != 0) goto create_ball_table_failure
+    ; Generate the config file
+    call create_ball_table
     test rax, rax
-    jne create_ball_table_failure
+    je load_config_hook_merge
     
-    
-    ; FileOpen succeded
-    mov rdi, qword [rbp-0x10] ; rdi = fileHandle
-    
-    ; write header
-    ; SDL2Storage::FileWrite (vtable[4])
-    mov rcx, rbx ; this
-    mov rdx, rdi ; fileHandle
-    lea r8, [rel ballTableHeader] ; content
-    mov r9, ballTableHeaderLen ; size
-    call qword [r12+0x20]
-    
-    
-    ; loop: print all default gooball ids
-    mov r13, 0 ; r13 = int i
-create_ball_table_loop_start:
-    lea rcx, [rel load_config_hook-0xF94B50] ; gooballIds
-    mov rcx, [rcx + r13 * 8]
-    mov [rsp+0x20], rcx
-    
-    ; snprintf
-    lea rcx, [rbp-0x90] ; dst
-    mov rdx, 0x80 ; = 128, n
-    lea r8, [rel ballTableLineFormat] ; format
-    mov r9, r13 ; var arg 0
-    call load_config_hook-0x1A62720
-    
-    ; SDL2Storage::FileWrite (vtable[4])
-    mov rcx, rbx ; this
-    mov rdx, rdi ; fileHandle
-    lea r8, [rbp-0x90] ; content
-    mov r9, rax ; size
-    call qword [r12+0x20]
-    
-    add r13, 1
-    cmp r13, baseGooballCount
-    jl create_ball_table_loop_start
-    
-    
-    ; SDL2Storage::FileClose (vtable[5])
-    mov rcx, rbx ; this
-    mov rdx, rdi ; fileHandle
-    call qword [r12+0x28]
-    
-    mov rax, 1 ; 1 for success
-    
-create_ball_table_merge:
-    add rsp, 0x28 + 0x80 + 0x20
-    
-    pop r13
-    pop rdi
-    pop r12
-    pop rbp
-    ret
-    
-create_ball_table_failure:
-    ; Show error message that ballTable.ini could not be created
     ; SDL_ShowSimpleMessageBox
-    mov ecx, 0x10
+    mov ecx, 0x40
     lea rdx, [rel msgTitle]
-    lea r8, [rel msgBallTableCreateErr]
+    lea r8, [rel msgBallTableCreateSuccess]
     xor r9, r9
     call load_config_hook-0x1AADD91
-    
-    xor rax, rax ; 0 for error
-    jmp create_ball_table_merge
+    jmp load_config_hook_merge
 
+
+; eolgizmo_hook
+;
+; Hooks into EOLGizmo::update and makes it use the custom gooballIds
+; table rather than the default one.
+eolgizmo_hook:
+    ; rdx is free right now
+    mov rdx, [rel customGooballIds]
+    mov rbx, [rdx+rcx*8] ; rbx = char* ballName
+    
+    jmp eolgizmo_hook-0x1A1CBC9
+
+
+; ballfactory_start_hook
+;
+; Hooks into BallFactory::load before the loop starts to make it
+; use the custom gooballIds (why does that function even reference
+; that?) and repurpose r14 into the gooballCount
+ballfactory_start_hook:
+    mov r14, [rel gooballCount] ; r14 = gooballCount
+    mov rsi, [rel customGooballIds] ; r14 = char** iterator
+    add rsi, 8 ; make it point to gooballIds[1]
+    jmp ballfactory_start_hook-0x1A3AA2C
+
+
+; ballfactory_loop_hook
+;
+; Hooks into BallFactory::load during the loop to make it calculate
+; the offset into this->templateInfos without r14
+ballfactory_loop_hook:
+    ; this fucking sucks, I assumed multiplication would not be this stupid
+    mov rax, rdi
+    mov rcx, 0x4cb48
+    mul rcx
+    
+    add rbx, rax
+    mov rdx, rbx
+    jmp ballfactory_loop_hook-0x1A3A9D2
+
+%include "patch/ini_extract.s"
+%include "patch/ini_parse.s"
 
 ; constants
 msgTitle db "Fisty Loader", 00h
-msgBallTableCreateErr db \
-    "Failed to create ballTable.ini file. Make sure the game directory is not ",\
-    "inside C:\Program Files or any other place that requires administrator permissions.", 0Ah, 0Ah,\
-    "Continuing with default settings.", 00h
 msgBallTableCreateSuccess db \
     "Successfully extracted assets from exe file into 'World of Goo 2 (current installation's game directory)/game/fisty'", 00h
 
 fistyPath db "fisty", 00h
 ballTablePath db "fisty/ballTable.ini", 00h
-ballTableHeader db \
-    "; This table defines all Gooball typeEnums", 0Dh, 0Ah, \
-    "; Extend this list to add your own gooballs.", 0Dh, 0Ah, \
-    "; ", 0Dh, 0Ah, \
-    "; Generated by FistyLoader 0.1", 0Dh, 0Ah, 0Dh, 0Ah
-ballTableHeaderLen equ $-ballTableHeader
-db 0
-
-ballTableLineFormat db "%d=%s", 0Dh, 0Ah, 00h
 
 baseGooballCount equ 39
 
