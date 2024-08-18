@@ -104,7 +104,7 @@ eolgizmo_hook:
 ;
 ; Hooks into BallFactory::load before the loop starts to make it
 ; use the custom gooballIds (why does that function even reference
-; that?) and repurpose r14 into the gooballCount
+; that?) and repurpose r14 into the gooballCount.
 ballfactory_start_hook:
     mov r14, [rel gooballCount] ; r14 = gooballCount
     mov rsi, [rel customGooballIds] ; r14 = char** iterator
@@ -115,7 +115,7 @@ ballfactory_start_hook:
 ; ballfactory_loop_hook
 ;
 ; Hooks into BallFactory::load during the loop to make it calculate
-; the offset into this->templateInfos without r14
+; the offset into this->templateInfos without r14.
 ballfactory_loop_hook:
     ; this fucking sucks, I assumed multiplication would not be this stupid
     mov rax, rdi
@@ -125,6 +125,50 @@ ballfactory_loop_hook:
     add rbx, rax
     mov rdx, rbx
     jmp ballfactory_loop_hook-0x1A3A9D2
+
+
+; ballfactory_init_hook
+;
+; Hooks into BallFactory::init and modifies BallFactory's allocation size
+; to be dynamically determined by gooballCount.
+ballfactory_init_hook:
+    mov rax, 0x4cb48 ; = sizeof(BallTemplateInfo)
+    mov rcx, qword [rel gooballCount] ; = gooballCount
+    mul rcx
+    
+    lea rcx, [rax+0x18]
+    jmp ballfactory_init_hook-0x1A3AAF6
+
+
+; ballfactory_constructor_hook1
+; 
+; Hooks into BallFactory's constructor and modifies the amount of templateInfos
+; to be initialized with BallTemplateInfo's constructor.
+ballfactory_constructor_hook1:
+    mov r8, qword [rel gooballCount]
+    jmp ballfactory_constructor_hook1-0x1A3B1A7
+
+
+; ballfactory_constructor_hook2
+; 
+; Hooks into BallFactory's constructor and modifies the value
+; this->templateInfos.length will be set to
+ballfactory_constructor_hook2:
+    mov rdx, qword [rel gooballCount]
+    mov dword [rdi+0x8], edx
+    jmp ballfactory_constructor_hook2-0x1A3B198
+
+
+; get_template_info_hook
+; 
+; Hooks into BallFactory::getTemplateInfo and modifies the
+; amount of templateInfos it iterates through to gooballCount
+get_template_info_hook:
+    inc r9 ; r9 = i
+    mov r8, qword [rel gooballCount]
+    cmp r9, r8
+    jmp get_template_info_hook-0x1A3AB96
+
 
 %include "patch/ini_extract.s"
 %include "patch/ini_parse.s"
