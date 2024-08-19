@@ -37,6 +37,9 @@ def patch_game(file: BufferedRandom):
     # BallFactory::getTemplateInfo: inc r9 + cmp r9, 0x27 -> get_template_info_hook
     overwrite_bytes(file, 0x14007c5c7, bytes([0xe9, 0x96, 0xAB, 0xA3, 0x01, 0x66, 0x90]))
     
+    # LoadingScreenRenderer::constructor: lea rdx, "" -> loading_screen_hook
+    overwrite_bytes(file, 0x1401780c7, bytes([0xe9, 0xA8, 0xF0, 0x93, 0x01, 0x66, 0x90]))
+    
     # Direct asm patches
     # BallTemplateInfoUtils::Deserialize: lea rax, [gooBallIds] -> mov rax, [customGooBallIds]
     overwrite_bytes(file, 0x1400818d3, bytes([0x48, 0x8b, 0x05, 0x26, 0x57, 0xa3, 0x01]))

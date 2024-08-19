@@ -170,6 +170,15 @@ get_template_info_hook:
     jmp get_template_info_hook-0x1A3AB96
 
 
+; loading_screen_hook
+; 
+; Hooks into the LoadingScreenRenderer constructor and reenables
+; the unused loading screen watermark to now use the text
+; in `loadingText`
+loading_screen_hook:
+    lea rdx, [rel loadingText]
+    jmp loading_screen_hook-0x193F0A8
+
 %include "patch/ini_extract.s"
 %include "patch/ini_parse.s"
 
@@ -182,6 +191,8 @@ fistyPath db "fisty", 00h
 ballTablePath db "fisty/ballTable.ini", 00h
 
 baseGooballCount equ 39
+
+loadingText db "Using FistyLoader v1.0", 00h
 
 ; in order to pad the file to the correct size (0x3000)
 section .ignoreme start=0x2ffc

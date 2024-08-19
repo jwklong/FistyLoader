@@ -188,13 +188,6 @@ load_ball_table_done:
     mov [rel customGooballIds], rcx
     mov [rel gooballCount], rdx
     
-    ; SDL_ShowSimpleMessageBox
-    mov ecx, 0x40
-    lea rdx, [rel msgTitle]
-    lea r8, [rel msgBallTableRead]
-    xor r9, r9
-    call load_config_hook-0x1AADD91
-    
 load_ball_table_merge:
     ; free
     mov rcx, qword [rbp-0x10] ; rcx = char* inputFile
@@ -548,8 +541,6 @@ read_line_trimmed_merge:
     ret
 
 ; constants
-msgBallTableRead db \
-    "Loaded ballTable.ini", 00h
 msgBallTableReadErr db \
     "Error reading ballTable.ini in line %d.", 0Ah, 0Ah, \
     "Copied current ballTable file to 'ballTable_backup.ini'", 0Ah, \
