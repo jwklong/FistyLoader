@@ -195,5 +195,5 @@ baseGooballCount equ 39
 loadingText db "Using FistyLoader v1.0", 00h
 
 ; in order to pad the file to the correct size (0x3000)
-section .ignoreme start=0x2ffc
+section .ignoreme start=0x2cbfc
 dd 0
