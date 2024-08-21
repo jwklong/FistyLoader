@@ -1,12 +1,12 @@
 BITS 64
 [map symbols symbols.map]
 
-section .fistyglobals vstart=0x1ab7000
+section .fistyglobals vstart=0x21c9000
 
 customGooballIds dq 0
 gooballCount dq 0
 
-section .fisty start=0x40 vstart=0x1ab7040
+section .fisty start=0x40 vstart=0x21c9040
 
 ; load_config_hook
 ; 
@@ -28,10 +28,10 @@ load_config_hook:
     
     ; FileSystemUtils::CreateDir
     lea rcx, [rel fistyPath]
-    call load_config_hook-0x1858150
+    call load_config_hook-0x1DE1450
     
     ; Environment::instance
-    call load_config_hook-0x1890FB0
+    call load_config_hook-0x1E1C140
     
     ; Environment::getStorage (vtable[0x28])
     mov rdx, qword [rax] ; rdx = env->vtable
@@ -65,12 +65,12 @@ load_config_hook_merge:
     pop rbx
     
     ; softbranch
-    mov qword [rsp+0x10], rbx
-    jmp load_config_hook-0x182E5AB
+    mov qword [rsp+8], rbx
+    jmp load_config_hook-0x1DB790B
 
 load_config_hook_create_balltable:
     ; load vanilla gooball table into custom table
-    lea rax, [rel load_config_hook-0xF94B50]
+    lea rax, [rel load_config_hook-0xFC4B50]
     mov qword [rel customGooballIds], rax
     mov qword [rel gooballCount], baseGooballCount
     
@@ -84,7 +84,7 @@ load_config_hook_create_balltable:
     lea rdx, [rel msgTitle]
     lea r8, [rel msgBallTableCreateSuccess]
     xor r9, r9
-    call load_config_hook-0x1AADD91
+    call load_config_hook-0x21B9C7F
     jmp load_config_hook_merge
 
 

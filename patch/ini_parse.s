@@ -36,7 +36,7 @@ load_ball_table:
     
     ; malloc
     lea ecx, [eax+1]
-    call qword [rel load_config_hook-0x9F510]
+    call load_config_hook-0x21B2C90
     mov r13, rax ; r13 = char* inputFile
     
     ; SDL2Storage::FileRead (vtable[3])
@@ -114,14 +114,14 @@ load_ball_table_alloc_buffers:
     ; allocate gooballIds[rbx+1] (w/ padding for safety) + string buffer
     ; malloc
     lea ecx, [rbx*8+rdi+8]
-    call qword [rel load_config_hook-0x9F510]
+    call load_config_hook-0x21B2C90
     mov qword [rbp-0x20], rax ; = char** gooballIds
     lea rdx, [rax+rbx*8] ; rdx = char** gooballIdsEnd
     add rdi, rdx ; rdi = char* stringBufEnd
     
     
     ; second loop: fill gooballIds with empty strings
-    lea rcx, [rel load_config_hook-0x125656F] ; rcx = "" (empty string)
+    lea rcx, [rel load_config_hook-0x13D404F] ; rcx = "" (empty string)
 load_ball_table_fill_empty_strings:
     mov [rax], rcx
     add rax, 8
@@ -167,7 +167,7 @@ load_ball_table_second_loop_start:
     mov rdx, rcx ; src
     mov rcx, r15 ; dest
     mov r8, rax ; count
-    call qword [rel load_config_hook-0x9EF00]
+    call load_config_hook-0x17506D0
     
     mov byte [r15+rbx], 0 ; null terminator
     
@@ -191,7 +191,7 @@ load_ball_table_done:
 load_ball_table_merge:
     ; free
     mov rcx, qword [rbp-0x10] ; rcx = char* inputFile
-    call qword [rel load_config_hook-0x9F4D8]
+    call load_config_hook-0x21BB7F0
     
     add rsp, 0x30 + 0x110 + 0x20
     
@@ -211,14 +211,14 @@ load_ball_table_error:
     mov rdx, 0x110 ; n
     lea r8, [rel msgBallTableReadErr] ; format
     mov r9, r15 ; var arg 0
-    call load_config_hook-0x1A62720
+    call load_config_hook-0x1FEB000
     
     ; SDL_ShowSimpleMessageBox
     mov ecx, 0x10
     lea rdx, [rel msgTitle]
     lea r8, [rbp-0x28-0x110]
     xor r9, r9
-    call load_config_hook-0x1AADD91
+    call load_config_hook-0x21B9C7F
     
     ; Create ballTable_backup.ini file with current content
     ; and regenerate ballTable.ini
@@ -258,7 +258,7 @@ load_ball_table_error:
     
 load_ball_table_error_merge:
     ; load vanilla gooball table into custom table
-    mov qword [rel customGooballIds], load_config_hook-0xF94B50
+    mov qword [rel customGooballIds], load_config_hook-0xFC4B50
     mov qword [rel gooballCount], baseGooballCount
     jmp load_ball_table_merge
     
@@ -268,7 +268,7 @@ load_ball_table_backup_failure:
     lea rdx, [rel msgTitle]
     lea r8, [rel msgBallTableBackupErr]
     xor r9, r9
-    call load_config_hook-0x1AADD91
+    call load_config_hook-0x21B9C7F
     jmp load_ball_table_error_merge
 
 
@@ -310,7 +310,7 @@ read_line_until_equals_first_loop_start:
     
     ; isspace
     movzx rcx, al
-    call qword [rel load_config_hook-0x9EEE0]
+    call load_config_hook-0x174DD00
     
     ; loop back again and increment r12 only if al is a space
     lea rcx, [r12+1]
@@ -345,7 +345,7 @@ read_line_until_equals_second_loop_start:
     
     ; isspace
     movzx rcx, al
-    call qword [rel load_config_hook-0x9EEE0]
+    call load_config_hook-0x174DD00
     test eax, eax
     cmove r13, r15 ; update the actual rhsLength if c is not whitespace
     
@@ -359,20 +359,21 @@ read_line_until_equals_second_loop_start:
 read_line_until_equals_end_of_read:
     mov rax, r13 ; lhsLength
     
-    ; reset errno to 0
-    call qword [rel load_config_hook-0x9F238]
-    mov dword [rax], 0
+    ; set_errno
+    mov ecx, 0
+    call load_config_hook-0x174C820
     
     ; strtol
     mov rcx, rbx ; str
     lea rdx, [rbp-0x8] ; str_end (out)
     mov r8, 10 ; base
-    call qword [rel load_config_hook-0x9F6F8]
+    call load_config_hook-0x1747B64
     mov r15d, eax
     
-    ; errno
-    call qword [rel load_config_hook-0x9F238]
-    cmp dword [rax], 0
+    ; get_errno
+    lea rcx, [rbp-0x10] ; = errno_t err
+    call load_config_hook-0x174C8B4
+    cmp dword [rbp-0x10], 0
     jne read_line_until_equals_return_err
     
     ; make sure strtol read the correct amount of characters
@@ -466,7 +467,7 @@ read_line_trimmed_skip_spaces:
     
     ; isspace
     movzx rcx, al
-    call qword [rel load_config_hook-0x9EEE0]
+    call load_config_hook-0x174DD00
     
     ; continue loop if c is a space
     lea rcx, [r12+1]
@@ -496,7 +497,7 @@ read_line_trimmed_count_name_chars:
     
     ; isspace
     movzx rcx, al
-    call qword [rel load_config_hook-0x9EEE0]
+    call load_config_hook-0x174DD00
     test eax, eax
     cmove rdi, rsi ; update the actual length if not whitespace
     

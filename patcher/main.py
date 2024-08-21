@@ -45,9 +45,7 @@ def main():
         fisty_section_offset = int.from_bytes(executable[0x3dc:0x3e0], byteorder='little')
         f.seek(fisty_section_offset)
         f.write(section_content)
-    
-    # with open('out.exe', 'rb+') as f:
-    #     patch_game(f)
+        patch_game(f)
 
 if __name__ == '__main__':
     main()
