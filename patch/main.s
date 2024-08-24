@@ -97,7 +97,7 @@ eolgizmo_hook:
     mov rdx, [rel customGooballIds]
     mov rbx, [rdx+rcx*8] ; rbx = char* ballName
     
-    jmp eolgizmo_hook-0x1A1CBC9
+    jmp eolgizmo_hook-0x1FA6149
 
 
 ; ballfactory_start_hook
@@ -109,7 +109,7 @@ ballfactory_start_hook:
     mov r14, [rel gooballCount] ; r14 = gooballCount
     mov rsi, [rel customGooballIds] ; r14 = char** iterator
     add rsi, 8 ; make it point to gooballIds[1]
-    jmp ballfactory_start_hook-0x1A3AA2C
+    jmp ballfactory_start_hook-0x1FC3A53
 
 
 ; ballfactory_loop_hook
@@ -124,7 +124,7 @@ ballfactory_loop_hook:
     
     add rbx, rax
     mov rdx, rbx
-    jmp ballfactory_loop_hook-0x1A3A9D2
+    jmp ballfactory_loop_hook-0x1FC3A00
 
 
 ; ballfactory_init_hook
@@ -137,7 +137,7 @@ ballfactory_init_hook:
     mul rcx
     
     lea rcx, [rax+0x18]
-    jmp ballfactory_init_hook-0x1A3AAF6
+    jmp ballfactory_init_hook-0x1FC3B16
 
 
 ; ballfactory_constructor_hook1
@@ -146,7 +146,7 @@ ballfactory_init_hook:
 ; to be initialized with BallTemplateInfo's constructor.
 ballfactory_constructor_hook1:
     mov r8, qword [rel gooballCount]
-    jmp ballfactory_constructor_hook1-0x1A3B1A7
+    jmp ballfactory_constructor_hook1-0x1FC41C6
 
 
 ; ballfactory_constructor_hook2
@@ -156,7 +156,7 @@ ballfactory_constructor_hook1:
 ballfactory_constructor_hook2:
     mov rdx, qword [rel gooballCount]
     mov dword [rdi+0x8], edx
-    jmp ballfactory_constructor_hook2-0x1A3B198
+    jmp ballfactory_constructor_hook2-0x1FC41B6
 
 
 ; get_template_info_hook
@@ -167,7 +167,20 @@ get_template_info_hook:
     inc r9 ; r9 = i
     mov r8, qword [rel gooballCount]
     cmp r9, r8
-    jmp get_template_info_hook-0x1A3AB96
+    jmp get_template_info_hook-0x1FC3BB4
+
+
+; create_objects_hook
+; 
+; Hooks into Item::createObjects and modifies the maximum
+; gooball type for userVars with type 4
+create_objects_hook:
+    mov rcx, qword [rel gooballCount]
+    dec rcx
+    
+    pxor xmm3, xmm3
+    cvtsi2ss xmm3, ecx
+    jmp create_objects_hook-0x1F6A81C
 
 
 ; loading_screen_hook
@@ -177,7 +190,8 @@ get_template_info_hook:
 ; in `loadingText`
 loading_screen_hook:
     lea rdx, [rel loadingText]
-    jmp loading_screen_hook-0x193F0A8
+    jmp loading_screen_hook-0x1EC9555
+
 
 %include "patch/ini_extract.s"
 %include "patch/ini_parse.s"
