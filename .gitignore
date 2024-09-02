@@ -3,8 +3,11 @@
 
 __pycache__
 .vscode
+.venv
 game
 disasm
+build
 
 patcher/custom_code.bin
 symbols.map
+install.spec

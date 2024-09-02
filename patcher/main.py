@@ -1,12 +1,13 @@
-from posixpath import dirname, isfile, join, realpath
+from io import BufferedRandom
+from os import path
+from posixpath import isfile
 from sys import argv
+import sys
 from pefile import PE, SectionStructure
 
-from hooks import patch_game
+from hooks import inject_hooks
 
 def add_section_header(pe: PE, section_size: int):
-    print(f"Increasing image size by 0x{section_size:x}...")
-    
     print("Creating section .fisty...")
     section: SectionStructure = pe.sections[-1]
     section.Name = ".fisty".encode()
@@ -24,8 +25,20 @@ def add_section_header(pe: PE, section_size: int):
     
     print(f"Virtual address of new section: 0x{section.VirtualAddress:x}")
 
-def main():
-    custom_code_path = join(dirname(realpath(argv[0])), 'custom_code.bin')
+def patch_game(file: BufferedRandom, game_bytes: bytes, section_content: bytes):
+    fisty_section_offset = int.from_bytes(game_bytes[0x3dc:0x3e0], byteorder='little')
+    file.seek(fisty_section_offset)
+    file.write(section_content)
+    inject_hooks(file)
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    base_path = getattr(sys, '_MEIPASS', path.dirname(path.abspath(__file__)))
+    return path.join(base_path, relative_path)
+
+def dev_main():
+    custom_code_path = resource_path('custom_code.bin')
+    
     with open(custom_code_path, 'rb') as f:
         section_content = f.read()
     
@@ -41,11 +54,7 @@ def main():
         print('out.exe exists already, only applying changes...')
     
     with open('out.exe', 'rb+') as f:
-        executable = f.read()
-        fisty_section_offset = int.from_bytes(executable[0x3dc:0x3e0], byteorder='little')
-        f.seek(fisty_section_offset)
-        f.write(section_content)
-        patch_game(f)
+        patch_game(f, f.read(), section_content)
 
 if __name__ == '__main__':
-    main()
+    dev_main()

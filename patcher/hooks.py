@@ -33,7 +33,7 @@ def hook_addr(file: BufferedRandom, virtual_address: int, target_address: int, *
     
     overwrite_bytes(file, virtual_address, buf)
 
-def patch_game(file: BufferedRandom):
+def inject_hooks(file: BufferedRandom):
     print("Injecting hooks...")
     
     # Hooks
