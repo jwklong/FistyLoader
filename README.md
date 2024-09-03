@@ -6,6 +6,8 @@ But he wondered what it might be like.
 
 -the Sign Painter
 
+<img width="40%" src="https://github.com/user-attachments/assets/392a3d2b-fa00-42a0-94b9-492e75863e61" alt="Image of creation made with Origami Wand">
+
 ## Installation (Windows)
 
 Make sure you are on the latest version of World of Goo 2. Copy your World of Goo 2 directory into some new place if you haven't already so you don't overwrite the original game.
