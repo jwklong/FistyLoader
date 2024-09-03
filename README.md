@@ -32,7 +32,7 @@ Then follow the instructions in the installer.
 
 When you run the game for the first time, FistyLoader is going to create the file `ballTable.ini` in the newly created `World of Goo 2/fisty` folder.
 
-To add new gooballs, create a folder for the ball type with a ball.wog2 and resources.xml file and add an entry with the same name to the end of the ballTable.ini file.
+To add new gooballs, create a folder in res/balls for the ball type with a ball.wog2 and resources.xml file and add an entry with the same name to the end of the ballTable.ini file.
 
 ## Contact
 
