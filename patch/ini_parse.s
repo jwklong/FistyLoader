@@ -258,7 +258,8 @@ load_ball_table_error:
     
 load_ball_table_error_merge:
     ; load vanilla gooball table into custom table
-    mov qword [rel customGooballIds], load_config_hook-0xFC4B50
+    lea rcx, [rel load_config_hook-0xFC4B50]
+    mov qword [rel customGooballIds], rcx
     mov qword [rel gooballCount], baseGooballCount
     jmp load_ball_table_merge
     
