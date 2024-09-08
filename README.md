@@ -14,7 +14,7 @@ Make sure you are on the latest version of World of Goo 2. Copy your World of Go
 
 Download the [FistyLoader Installer](https://github.com/Darxoon/FistyLoader/releases) and run it. When it asks you to give it your World of Goo 2.exe file, drag and drop the new executable into the window and press enter, so it can patch the game.
 
-After that is done, you can continue to [Usage](#usage).
+After this is done, if you here to play mods, you can start playing them. If you are here to create custom gooballs, see [Usage](#usage).
 
 ## Installation (Mac or Linux)
 
