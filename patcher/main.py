@@ -11,11 +11,11 @@ def add_section_header(pe: PE, section_size: int):
     print("Creating section .fisty...")
     section: SectionStructure = pe.sections[-1]
     section.Name = ".fisty".encode()
-    section.Misc = section_size - 0x104
-    section.Misc_PhysicalAddress = section_size - 0x104
-    section.Misc_VirtualSize = section_size - 0x104
+    # section.Misc = section_size - 0x104
+    # section.Misc_PhysicalAddress = section_size - 0x104
+    # section.Misc_VirtualSize = section_size - 0x104
     # section.VirtualAddress = prev_section.VirtualAddress + prev_section.SizeOfRawData
-    section.SizeOfRawData = section_size
+    # section.SizeOfRawData = section_size
     # section.PointerToRawData = prev_section.PointerToRawData + prev_section.SizeOfRawData
     section.PointerToRelocations = 0
     section.PointerToLinenumbers = 0
@@ -26,10 +26,17 @@ def add_section_header(pe: PE, section_size: int):
     print(f"Virtual address of new section: 0x{section.VirtualAddress:x}")
 
 def patch_game(file: BufferedRandom, game_bytes: bytes, section_content: bytes):
+    fisty_section_size = int.from_bytes(game_bytes[0x3d8:0x3dc], byteorder='little')
     fisty_section_offset = int.from_bytes(game_bytes[0x3dc:0x3e0], byteorder='little')
+    
+    if len(section_content) > fisty_section_size:
+        raise ValueError("Content of .fisty section is too large!")
+    
+    section_content = section_content.ljust(fisty_section_size, b"\0")
+    
     file.seek(fisty_section_offset)
     file.write(section_content)
-    inject_hooks(file)
+    # inject_hooks(file)
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
@@ -43,8 +50,8 @@ def dev_main():
         section_content = f.read()
     
     if not isfile('out.exe') or argv[1] in ['--clean', '-c']:
-        print('Reading World of Goo 2.exe...')
-        pe = PE("World of Goo 2.exe")
+        print('Reading WorldofGoo2.exe...')
+        pe = PE("WorldofGoo2.exe")
         
         add_section_header(pe, len(section_content))
         

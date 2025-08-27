@@ -1,5 +1,6 @@
 **/*.exe
 **/*.bak
+**/*.dll
 
 __pycache__
 .vscode
