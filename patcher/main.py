@@ -36,7 +36,7 @@ def patch_game(file: BufferedRandom, game_bytes: bytes, section_content: bytes):
     
     file.seek(fisty_section_offset)
     file.write(section_content)
-    # inject_hooks(file)
+    inject_hooks(file)
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """

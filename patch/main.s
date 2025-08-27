@@ -1,12 +1,12 @@
 BITS 64
-[map symbols symbols.map]
 
-section .fistyglobals vstart=0x21c9000
+extern loading_screen_hook_return
+extern loading_screen_draw_hook_return
+
+section .fisty
 
 customGooballIds dq 0
 gooballCount dq 0
-
-section .fisty start=0x40 vstart=0x21c9040
 
 ; load_config_hook
 ; 
@@ -190,7 +190,7 @@ create_objects_hook:
 ; in `loadingText`
 loading_screen_hook:
     lea rdx, [rel loadingText]
-    jmp loading_screen_hook-0x1EC9555
+    jmp loading_screen_hook_return
 
 
 %include "patch/ini_extract.s"
