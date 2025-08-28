@@ -1,3 +1,5 @@
+extern snprintf
+
 ; create_ball_table
 ;
 ; Creates ballTable.ini and extracts the default gooballIds table into it.
@@ -43,7 +45,7 @@ create_ball_table:
     ; loop: print all default gooball ids
     mov r13, 0 ; r13 = int i
 create_ball_table_loop_start:
-    lea rcx, [rel load_config_hook-0xFC4B50] ; gooballIds
+    lea rcx, [rel gooballIds] ; gooballIds
     mov rcx, [rcx + r13 * 8]
     mov [rsp+0x20], rcx
     
@@ -52,7 +54,7 @@ create_ball_table_loop_start:
     mov rdx, 0x80 ; = 128, n
     lea r8, [rel ballTableLineFormat] ; format
     mov r9, r13 ; var arg 0
-    call load_config_hook-0x1FEB000
+    call snprintf
     
     ; SDL2Storage::FileWrite (vtable[4])
     mov rcx, rbx ; this
@@ -89,7 +91,7 @@ create_ball_table_failure:
     lea rdx, [rel msgTitle]
     lea r8, [rel msgBallTableCreateErr]
     xor r9, r9
-    call load_config_hook-0x21B9C7F
+    call SDL_ShowSimpleMessageBox
     
     xor rax, rax ; 0 for error
     jmp create_ball_table_merge

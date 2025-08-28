@@ -1,7 +1,15 @@
 BITS 64
 
+extern SDL_ShowSimpleMessageBox
+extern FileSystemUtils_CreateDir
+extern Environment_instance
+
+extern gooballIds
+
 extern loading_screen_hook_return
 extern loading_screen_draw_hook_return
+extern load_config_hook_return
+extern eolgizmo_hook_return
 
 section .fisty
 
@@ -28,15 +36,15 @@ load_config_hook:
     
     ; FileSystemUtils::CreateDir
     lea rcx, [rel fistyPath]
-    call load_config_hook-0x1DE1450
+    call FileSystemUtils_CreateDir
     
     ; Environment::instance
-    call load_config_hook-0x1E1C140
+    call Environment_instance
     
     ; Environment::getStorage (vtable[0x28])
     mov rdx, qword [rax] ; rdx = env->vtable
     mov rcx, rax
-    call qword [rdx + 0x140]
+    call qword [rdx + 0x150]
     mov rbx, rax ; rbx = SDL2Storage* storage
     
     ; SDL2Storage::FileExists (vtable[1])
@@ -66,11 +74,11 @@ load_config_hook_merge:
     
     ; softbranch
     mov qword [rsp+8], rbx
-    jmp load_config_hook-0x1DB790B
+    jmp load_config_hook_return
 
 load_config_hook_create_balltable:
     ; load vanilla gooball table into custom table
-    lea rax, [rel load_config_hook-0xFC4B50]
+    lea rax, [rel gooballIds]
     mov qword [rel customGooballIds], rax
     mov qword [rel gooballCount], baseGooballCount
     
@@ -84,7 +92,7 @@ load_config_hook_create_balltable:
     lea rdx, [rel msgTitle]
     lea r8, [rel msgBallTableCreateSuccess]
     xor r9, r9
-    call load_config_hook-0x21B9C7F
+    call SDL_ShowSimpleMessageBox
     jmp load_config_hook_merge
 
 
@@ -97,7 +105,7 @@ eolgizmo_hook:
     mov rdx, [rel customGooballIds]
     mov rbx, [rdx+rcx*8] ; rbx = char* ballName
     
-    jmp eolgizmo_hook-0x1FA6149
+    jmp eolgizmo_hook_return
 
 
 ; ballfactory_start_hook

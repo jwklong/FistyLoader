@@ -37,11 +37,11 @@ def inject_hooks(file: BufferedRandom):
     print("Injecting hooks...")
     
     # Hooks
-    # # SDL2Environment::loadConfig -> load_config_hook
-    # hook_addr(file, 0x140411730, 0x1421C9040)
+    # SDL2Environment::loadConfig -> load_config_hook
+    hook_addr(file, 0x14048a250, 0x1424fc010)
     
-    # # EOLGizmo::update: mov rbx, qword [r15+rcx*8+gooballIds] -> eolgizmo_hook
-    # hook_addr(file, 0x140222fa4, 0x1421C90F2, padding=3)
+    # EOLGizmo::update: mov rbx, qword [r15+rcx*8+gooballIds] -> eolgizmo_hook
+    # hook_addr(file, 0x14022f400, 0x1424fc0c2, padding=3)
     
     # # BallFactory::load (before loop) -> ballfactory_start_hook
     # hook_addr(file, 0x1402056a2, 0x1421C9102, padding=8)
@@ -67,7 +67,10 @@ def inject_hooks(file: BufferedRandom):
     # LoadingScreenRenderer::constructor: lea rdx, "" -> loading_screen_hook
     hook_addr(file, 0x14035012a, 0x1424fc15b, padding=2)
     
-    # # Direct asm patches
+    # Direct asm patches
+    # Skip SteamAPI
+    # overwrite_bytes(file, 0x14041a75f, NOP_SEQUENCES[5])
+    
     # # BallTemplateInfoUtils::Deserialize: lea rax, [gooBallIds] -> mov rax, [customGooBallIds]
     # overwrite_bytes(file, 0x14020a850, bytes([0x48, 0x8b, 0x05, 0xa9, 0xe7, 0xfb, 0x01]))
     
