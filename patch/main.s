@@ -17,6 +17,8 @@ extern ballfactory_constructor_hook1_return
 extern ballfactory_constructor_hook2_return
 extern get_template_info_hook_return
 extern create_objects_hook_return
+extern ball_deserialize_hook_return
+extern itempipein_spawnball_hook_return
 
 section .fisty
 
@@ -198,6 +200,23 @@ create_objects_hook:
     jmp create_objects_hook_return
 
 
+; ball_deserialize_hook
+;
+; Hooks into BallTemplateInfoUtils::Deserialize and
+; replaces gooBallIds with customGooBallIds
+ball_deserialize_hook:
+    mov rax, [rel customGooballIds]
+    jmp ball_deserialize_hook_return
+
+
+; itempipein_spawnball_hook
+;
+; Hooks into ItemPipeIn::spawnBall and replaces
+; gooBallIds with customGooBallIds
+itempipein_spawnball_hook:
+    mov rax, [rel customGooballIds]
+    jmp itempipein_spawnball_hook_return
+
 ; loading_screen_hook
 ; 
 ; Hooks into the LoadingScreenRenderer constructor and reenables
@@ -221,4 +240,4 @@ ballTablePath db "fisty/ballTable.ini", 00h
 
 baseGooballCount equ 39
 
-loadingText db "Using FistyLoader v1.0", 00h
+loadingText db "Using FistyLoader v1.1", 00h

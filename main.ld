@@ -25,6 +25,8 @@ ballfactory_constructor_hook1_return = 0x20e2d1;
 ballfactory_constructor_hook2_return = 0x20e2ed;
 get_template_info_hook_return = 0x20e8fe;
 create_objects_hook_return = 0x2988a7;
+ball_deserialize_hook_return = 0x214036;
+itempipein_spawnball_hook_return = 0x2be7c0;
 
 SECTIONS
 {

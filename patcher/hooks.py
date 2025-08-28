@@ -73,18 +73,18 @@ def inject_hooks(file: BufferedRandom, symtab: SymbolTableSection):
     # Item::createObjects: movss xmm3, 38.0
     hook_symbol(file, symtab, 0x14029889f, "create_objects_hook", padding=3)
     
-    # LoadingScreenRenderer::constructor: lea rdx, "" -> loading_screen_hook
-    hook_addr(file, 0x14035012a, 0x1424fc15b, padding=2)
+    # BallTemplateInfoUtils::Deserialize: lea rax, [gooBallIds]
+    hook_symbol(file, symtab, 0x14021402f, "ball_deserialize_hook", padding=2)
+    
+    # ItemPipeIn::spawnBall: lea rax, [gooBallIds] -> mov rax, [customGooBallIds]
+    hook_symbol(file, symtab, 0x1402be7b9, "itempipein_spawnball_hook", padding=2)
+    
+    # LoadingScreenRenderer::constructor: lea rdx, ""
+    hook_symbol(file, symtab, 0x14035012a, "loading_screen_hook", padding=2)
     
     # Direct asm patches
     # Skip SteamAPI (crashes)
     # overwrite_bytes(file, 0x14041a75f, NOP_SEQUENCES[5])
-    
-    # # BallTemplateInfoUtils::Deserialize: lea rax, [gooBallIds] -> mov rax, [customGooBallIds]
-    # overwrite_bytes(file, 0x14020a850, bytes([0x48, 0x8b, 0x05, 0xa9, 0xe7, 0xfb, 0x01]))
-    
-    # # ItemPipeIn::spawnBall: lea rax, [gooBallIds] -> mov rax, [customGooBallIds]
-    # overwrite_bytes(file, 0x140283ce9, bytes([0x48, 0x8b, 0x05, 0x10, 0x53, 0xf4, 0x01]))
     
     # BallFactory::load: add r14, 0x4cb48 + cmp edi, 0x27 -> 7-byte nop + cmp edi, r14d (unhardcode gooball cap)
     overwrite_bytes(file, 0x14020eab5, bytes([0x0F, 0x1F, 0x80, 0x00, 0x00, 0x00, 0x00, 0x44, 0x39, 0xf7]))
