@@ -18,6 +18,13 @@ loading_screen_hook_return = 0x350131;
 loading_screen_draw_hook_return = 0x350c20;
 load_config_hook_return = 0x48a255;
 eolgizmo_hook_return = 0x22f408;
+ballfactory_start_hook_return = 0x20e9ff;
+ballfactory_loop_hook_return = 0x20ea96;
+ballfactory_init_hook_return = 0x20e969;
+ballfactory_constructor_hook1_return = 0x20e2d1;
+ballfactory_constructor_hook2_return = 0x20e2ed;
+get_template_info_hook_return = 0x20e8fe;
+create_objects_hook_return = 0x2988a7;
 
 SECTIONS
 {

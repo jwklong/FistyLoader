@@ -10,6 +10,13 @@ extern loading_screen_hook_return
 extern loading_screen_draw_hook_return
 extern load_config_hook_return
 extern eolgizmo_hook_return
+extern ballfactory_start_hook_return
+extern ballfactory_loop_hook_return
+extern ballfactory_init_hook_return
+extern ballfactory_constructor_hook1_return
+extern ballfactory_constructor_hook2_return
+extern get_template_info_hook_return
+extern create_objects_hook_return
 
 section .fisty
 
@@ -115,9 +122,9 @@ eolgizmo_hook:
 ; that?) and repurpose r14 into the gooballCount.
 ballfactory_start_hook:
     mov r14, [rel gooballCount] ; r14 = gooballCount
-    mov rsi, [rel customGooballIds] ; r14 = char** iterator
+    mov rsi, [rel customGooballIds] ; rsi = char** iterator
     add rsi, 8 ; make it point to gooballIds[1]
-    jmp ballfactory_start_hook-0x1FC3A53
+    jmp ballfactory_start_hook_return
 
 
 ; ballfactory_loop_hook
@@ -132,7 +139,7 @@ ballfactory_loop_hook:
     
     add rbx, rax
     mov rdx, rbx
-    jmp ballfactory_loop_hook-0x1FC3A00
+    jmp ballfactory_loop_hook_return
 
 
 ; ballfactory_init_hook
@@ -145,7 +152,7 @@ ballfactory_init_hook:
     mul rcx
     
     lea rcx, [rax+0x18]
-    jmp ballfactory_init_hook-0x1FC3B16
+    jmp ballfactory_init_hook_return
 
 
 ; ballfactory_constructor_hook1
@@ -154,7 +161,7 @@ ballfactory_init_hook:
 ; to be initialized with BallTemplateInfo's constructor.
 ballfactory_constructor_hook1:
     mov r8, qword [rel gooballCount]
-    jmp ballfactory_constructor_hook1-0x1FC41C6
+    jmp ballfactory_constructor_hook1_return
 
 
 ; ballfactory_constructor_hook2
@@ -164,7 +171,7 @@ ballfactory_constructor_hook1:
 ballfactory_constructor_hook2:
     mov rdx, qword [rel gooballCount]
     mov dword [rdi+0x8], edx
-    jmp ballfactory_constructor_hook2-0x1FC41B6
+    jmp ballfactory_constructor_hook2_return
 
 
 ; get_template_info_hook
@@ -175,7 +182,7 @@ get_template_info_hook:
     inc r9 ; r9 = i
     mov r8, qword [rel gooballCount]
     cmp r9, r8
-    jmp get_template_info_hook-0x1FC3BB4
+    jmp get_template_info_hook_return
 
 
 ; create_objects_hook
@@ -188,7 +195,7 @@ create_objects_hook:
     
     pxor xmm3, xmm3
     cvtsi2ss xmm3, ecx
-    jmp create_objects_hook-0x1F6A81C
+    jmp create_objects_hook_return
 
 
 ; loading_screen_hook
