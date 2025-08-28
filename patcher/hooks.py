@@ -1,4 +1,5 @@
 from io import BufferedRandom
+from elftools.elf.sections import SymbolTableSection
 
 # from https://stackoverflow.com/a/36361832/10079808
 NOP_SEQUENCES = [
@@ -33,12 +34,20 @@ def hook_addr(file: BufferedRandom, virtual_address: int, target_address: int, *
     
     overwrite_bytes(file, virtual_address, buf)
 
-def inject_hooks(file: BufferedRandom):
+def hook_symbol(file: BufferedRandom, symtab: SymbolTableSection, virtual_address: int, target_symbol: str, *, padding: int = 0):
+    symbols = symtab.get_symbol_by_name(target_symbol)
+    if symbols is None or len(symbols) == 0:
+        raise Exception(f"Could not find symbol called {target_symbol}")
+    
+    [symbol] = symbols
+    hook_addr(file, virtual_address, 0x140000000 | symbol.entry.st_value, padding=padding)
+
+def inject_hooks(file: BufferedRandom, symtab: SymbolTableSection):
     print("Injecting hooks...")
     
     # Hooks
     # SDL2Environment::loadConfig -> load_config_hook
-    hook_addr(file, 0x14048a250, 0x1424fc010)
+    hook_symbol(file, symtab, 0x14048a250, "load_config_hook")
     
     # EOLGizmo::update: mov rbx, qword [r15+rcx*8+gooballIds] -> eolgizmo_hook
     # hook_addr(file, 0x14022f400, 0x1424fc0c2, padding=3)
@@ -68,7 +77,7 @@ def inject_hooks(file: BufferedRandom):
     hook_addr(file, 0x14035012a, 0x1424fc15b, padding=2)
     
     # Direct asm patches
-    # Skip SteamAPI
+    # Skip SteamAPI (crashes)
     # overwrite_bytes(file, 0x14041a75f, NOP_SEQUENCES[5])
     
     # # BallTemplateInfoUtils::Deserialize: lea rax, [gooBallIds] -> mov rax, [customGooBallIds]

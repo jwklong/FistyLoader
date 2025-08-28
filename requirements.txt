@@ -1,4 +1,5 @@
 pefile
+pyelftools
 pyinstaller
 colorama
 readchar

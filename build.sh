@@ -5,7 +5,12 @@ assemble() {
 }
 
 link() {
-    ld -o patcher/custom_code.bin --oformat binary patch/build/main.o -T main.ld
+    ld -o patch/build/custom_code.o --oformat elf64-x86-64 patch/build/main.o -T main.ld
 }
 
-assemble && link && python3 patcher/main.py "$1"
+copy() {
+    objcopy patch/build/custom_code.o -O binary patcher/custom_code.bin
+    objcopy patch/build/custom_code.o --only-keep-debug patcher/custom_code_symbols.o
+}
+
+assemble && link && copy && python3 patcher/main.py "$1"

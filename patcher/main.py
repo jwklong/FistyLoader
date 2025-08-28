@@ -1,9 +1,11 @@
-from io import BufferedRandom
+from io import BufferedRandom, BytesIO
 from os import path
 from posixpath import isfile
 from sys import argv
 import sys
 from pefile import PE, SectionStructure
+from elftools.elf.elffile import ELFFile
+from elftools.elf.sections import SymbolTableSection
 
 from hooks import inject_hooks
 
@@ -25,7 +27,7 @@ def add_section_header(pe: PE, section_size: int):
     
     print(f"Virtual address of new section: 0x{section.VirtualAddress:x}")
 
-def patch_game(file: BufferedRandom, game_bytes: bytes, section_content: bytes):
+def patch_game(file: BufferedRandom, game_bytes: bytes, section_content: bytes, symtab: SymbolTableSection):
     fisty_section_size = int.from_bytes(game_bytes[0x3d8:0x3dc], byteorder='little')
     fisty_section_offset = int.from_bytes(game_bytes[0x3dc:0x3e0], byteorder='little')
     
@@ -36,7 +38,7 @@ def patch_game(file: BufferedRandom, game_bytes: bytes, section_content: bytes):
     
     file.seek(fisty_section_offset)
     file.write(section_content)
-    inject_hooks(file)
+    inject_hooks(file, symtab)
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
@@ -45,11 +47,15 @@ def resource_path(relative_path):
 
 def dev_main():
     custom_code_path = resource_path('custom_code.bin')
+    custom_code_symbols_path = resource_path('custom_code_symbols.o')
     
     with open(custom_code_path, 'rb') as f:
         section_content = f.read()
+        
+    with open(custom_code_symbols_path, 'rb') as f:
+        symbols_bin = f.read()
     
-    if not isfile('out.exe') or argv[1] in ['--clean', '-c']:
+    if not isfile('out.exe') or (len(argv) >= 2 and argv[1] in ['--clean', '-c']):
         print('Reading WorldofGoo2.exe...')
         pe = PE("WorldofGoo2.exe")
         
@@ -60,8 +66,11 @@ def dev_main():
     else:
         print('out.exe exists already, only applying changes...')
     
+    symbols = ELFFile(BytesIO(symbols_bin))
+    symtab: SymbolTableSection = symbols.get_section_by_name(".symtab")
+    
     with open('out.exe', 'rb+') as f:
-        patch_game(f, f.read(), section_content)
+        patch_game(f, f.read(), section_content, symtab)
 
 if __name__ == '__main__':
     dev_main()
