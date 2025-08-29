@@ -10,18 +10,34 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  one:
     runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup NASM
+      uses: ilammy/setup-nasm@v1.5.1
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: "custom_code"
+        path: "patcher/custom_code.bin"
+
+  two:
+    runs-on: windows-latest
+    needs: [one]
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python 3.11
       uses: actions/setup-python@v3
       with:
         python-version: "3.11"
-    - name: Setup NASM
-      uses: ilammy/setup-nasm@v1.5.1
     - name: Setup venv
       run: "python -m venv .venv"
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: "custom_code"
+        path: "patcher/"
     - name: Build Installer
       run: "sh build_installer.sh"
     - name: Upload a Build Artifact
@@ -29,4 +45,3 @@ jobs:
       with:
         name: "installer"
         path: "./dist/install"
-          
