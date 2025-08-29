@@ -6,6 +6,8 @@ from main import add_section_header, patch_game, resource_path
 from colorama import Fore, just_fix_windows_console
 from pefile import PE
 from readchar import readkey
+from elftools.elf.elffile import ELFFile
+from elftools.elf.sections import SymbolTableSection
 
 def install():
     # Enables color codes in Windows command prompt
@@ -13,9 +15,15 @@ def install():
         just_fix_windows_console()
     
     custom_code_path = resource_path('custom_code.bin')
+    custom_code_symbols_path = resource_path('custom_code_symbols.o')
     
     with open(custom_code_path, 'rb') as f:
         section_content = f.read()
+    with open(custom_code_symbols_path, 'rb') as f:
+        symbols_bin = f.read()
+    
+    symbols = ELFFile(BytesIO(symbols_bin))
+    symtab: SymbolTableSection = symbols.get_section_by_name(".symtab")
     
     # Get user input
     try:
@@ -67,7 +75,7 @@ def install():
             f.seek(0)
             f.write(modified)
             
-            patch_game(f, bytes(modified), section_content)
+            patch_game(f, bytes(modified), section_content, symtab)
         except KeyboardInterrupt:
             print("Restoring original...")
             
