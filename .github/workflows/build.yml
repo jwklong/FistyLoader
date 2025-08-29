@@ -46,4 +46,4 @@ jobs:
       uses: actions/upload-artifact@v4.6.2
       with:
         name: "installer"
-        path: "./dist/install"
+        path: "./dist/install.exe"
