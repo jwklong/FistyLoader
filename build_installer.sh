@@ -34,7 +34,6 @@ copy() {
 
 assemble && link && copy
 
-nasm patch/main.s -o patcher/custom_code.bin
 pyinstaller -F patcher/install.py --add-data patcher/custom_code.bin:. --recursive-copy-metadata readchar --clean
 
 echo Done.
