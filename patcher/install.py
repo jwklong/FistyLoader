@@ -8,6 +8,7 @@ from pefile import PE
 from readchar import readkey
 from elftools.elf.elffile import ELFFile
 from elftools.elf.sections import SymbolTableSection
+from io import BytesIO
 
 def install():
     # Enables color codes in Windows command prompt
