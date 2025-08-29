@@ -21,7 +21,8 @@ def install():
     try:
         print("Welcome to the FistyLoader installer!\n")
         print("Make sure you are not modifying your original World of Goo 2 installation.")
-        print("Copy the game to a new location if you haven't already.\n")
+        print(f"\n{Fore.RED}Please make sure you are patching the LATEST STEAM version. There are no hash checks currently in this installer.{Fore.RESET}")
+        print("Make a backup of your wog2 executable before running, steam will force only the file at the orginal file location to run, so run the installer on that.\n")
         
         print("If that's done, drag and drop the new World of Goo 2.exe to below.")
         game_path = input("World of Goo 2 exe path: ")
@@ -49,9 +50,9 @@ def install():
             game_bytes = f.read()
             game_hash = sha1(game_bytes).hexdigest()
             
-            if game_hash != "715253535eaa08d7b1e643c7dfaabf1a478a6cc4":
-                print(f"\n{Fore.RED}Invalid game exe. Make sure you have updated World of Goo 2 to the newest version.{Fore.RESET}")
-                exit(1)
+            # if game_hash != "715253535eaa08d7b1e643c7dfaabf1a478a6cc4":
+                # print(f"\n{Fore.RED}Invalid game exe. Make sure you have updated World of Goo 2 to the newest version.{Fore.RESET}")
+                # exit(1)
             
             print('Reading World of Goo 2.exe...')
             pe = PE(game_path)
