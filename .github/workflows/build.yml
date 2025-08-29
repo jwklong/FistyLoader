@@ -12,7 +12,7 @@ permissions:
 jobs:
   build:
 
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
@@ -24,15 +24,11 @@ jobs:
       uses: ilammy/setup-nasm@v1.5.1
     - name: Setup venv
       run: "python -m venv .venv"
-    - name: Install MinGW
-      uses: egor-tensin/setup-mingw@v2.2.0
-      with:
-        version: 12.2.0
     - name: Build Installer
       run: "sh build_installer.sh"
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.6.2
       with:
         name: "installer"
-        path: "./dist/install.exe"
+        path: "./dist/install"
           
