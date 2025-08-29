@@ -18,6 +18,9 @@ jobs:
       uses: ilammy/setup-nasm@v1.5.1
     - name: Upload artifact
       uses: actions/upload-artifact@v4
+    - name: Make custom code
+      run: "sh build.sh"
+    - name: Build Installer
       with:
         name: "custom_code"
         path: "patcher/custom_code.bin"
