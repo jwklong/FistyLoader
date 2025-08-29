@@ -13,4 +13,4 @@ copy() {
     objcopy patch/build/custom_code.o --only-keep-debug patcher/custom_code_symbols.o
 }
 
-assemble && link && copy && python3 patcher/main.py "$1"
+assemble && link && copy
