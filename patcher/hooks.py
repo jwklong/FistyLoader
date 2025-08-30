@@ -79,9 +79,6 @@ def inject_hooks(file: BufferedRandom, symtab: SymbolTableSection):
     # ItemPipeIn::spawnBall: lea rax, [gooBallIds] -> mov rax, [customGooBallIds]
     hook_symbol(file, symtab, 0x1402be7b9, "itempipein_spawnball_hook", padding=2)
 
-    # GetGooBallName
-    hook_symbol(file, symtab, 0x14027b619, "gooballname_hook1")
-    hook_symbol(file, symtab, 0x14027b752, "gooballname_hook2", padding=4)
     
     # LoadingScreenRenderer::constructor: lea rdx, ""
     hook_symbol(file, symtab, 0x14035012a, "loading_screen_hook", padding=2)
@@ -92,3 +89,6 @@ def inject_hooks(file: BufferedRandom, symtab: SymbolTableSection):
     
     # BallFactory::load: add r14, 0x4cb48 + cmp edi, 0x27 -> 7-byte nop + cmp edi, r14d (unhardcode gooball cap)
     overwrite_bytes(file, 0x14020eab5, bytes([0x0F, 0x1F, 0x80, 0x00, 0x00, 0x00, 0x00, 0x44, 0x39, 0xf7]))
+
+    # GetGooballName
+    overwrite_bytes(file, 0x14027b5fa, bytes([0x48, 0x8d, 0x05, 0xff, 0x09, 0x28, 0x02]))
