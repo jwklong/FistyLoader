@@ -226,7 +226,7 @@ gooballname_hook:
     jmp gooballname_hook_return
 
 gooballname_hook_comp:
-    mov rax, [rel customGooBallIds]
+    mov rax, [rel customGooballIds]
     jmp gooballname_hook_comp_return
 
 ; loading_screen_hook
