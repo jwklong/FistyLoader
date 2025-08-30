@@ -82,6 +82,18 @@ def inject_hooks(file: BufferedRandom, symtab: SymbolTableSection):
     # LoadingScreenRenderer::constructor: lea rdx, ""
     hook_symbol(file, symtab, 0x14035012a, "loading_screen_hook", padding=2)
     
+    # GetGooBallName: lea rax, [gooBallIds]
+    hook_symbol(file, symtab, 0x14027b5fa, "get_gooball_name_hook1", padding=2)
+    
+    # GetGooBallName: add rdx, 0x27 + mov rcx, qword [rcx - 0x8]
+    hook_symbol(file, symtab, 0x14027b738, "get_gooball_name_hook2", padding=3)
+    
+    # ItemPropertiesGizmo::setStateFromItem: lea r9, [gooBallIds] + [...] + mov r8d, 0x26
+    hook_symbol(file, symtab, 0x1402c8872, "set_state_from_item_hook", padding=2) # padding should be more
+    
+    # ItemPropertiesGizmo::setStateFromBall: lea r9, [gooBallIds] + [...] + mov r8d, 0x26
+    hook_symbol(file, symtab, 0x1402c7e53, "set_state_from_ball_hook", padding=2) # padding should be more
+    
     # Direct asm patches
     # Skip SteamAPI (crashes)
     # overwrite_bytes(file, 0x14041a75f, NOP_SEQUENCES[5])

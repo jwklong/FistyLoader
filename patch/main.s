@@ -19,6 +19,10 @@ extern get_template_info_hook_return
 extern create_objects_hook_return
 extern ball_deserialize_hook_return
 extern itempipein_spawnball_hook_return
+extern get_gooball_name_hook1_return
+extern get_gooball_name_hook2_return
+extern set_state_from_item_hook_return
+extern set_state_from_ball_hook_return
 
 section .fisty
 
@@ -217,6 +221,7 @@ itempipein_spawnball_hook:
     mov rax, [rel customGooballIds]
     jmp itempipein_spawnball_hook_return
 
+
 ; loading_screen_hook
 ; 
 ; Hooks into the LoadingScreenRenderer constructor and reenables
@@ -225,6 +230,52 @@ itempipein_spawnball_hook:
 loading_screen_hook:
     lea rdx, [rel loadingText]
     jmp loading_screen_hook_return
+
+
+; get_gooball_name_hook1
+;
+; Hooks into GetGooBallName and replaces GooBallIds with
+; customGooballIds
+get_gooball_name_hook1:
+    mov rax, [rel customGooballIds]
+    jmp get_gooball_name_hook1_return
+
+
+; get_gooball_name_hook2
+;
+; Hooks into GetGooBallName and unhardcodes the gooball count
+get_gooball_name_hook2:
+    mov rsi, [rel gooballCount]
+    add rdx, rsi
+    
+    mov rcx, qword [rcx - 0x8]
+    jmp get_gooball_name_hook2_return
+
+
+; set_state_from_item_hook
+;
+; Hooks into ItemPropertiesGizmo::setStateFromItem and unhardcodes
+; gooBallIds and gooballCount
+set_state_from_item_hook:
+    mov r9, [rel customGooballIds]
+    mov dword [rsp+0x20], 1
+    mov r8d, [rel gooballCount]
+    sub r8d, 1
+    
+    jmp set_state_from_item_hook_return
+
+
+; set_state_from_ball_hook
+;
+; Hooks into ItemPropertiesGizmo::setStateFromBall and un-hardcodes
+; gooBallIds and gooballCount
+set_state_from_ball_hook:
+    mov r8d, [rel gooballCount]
+    mov r9, [rel customGooballIds]
+    mov rbx, qword [rdi + 0xe1ac0]
+    sub r8d, 1
+    
+    jmp set_state_from_ball_hook_return
 
 
 %include "patch/ini_extract.s"

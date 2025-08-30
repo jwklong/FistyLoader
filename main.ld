@@ -27,6 +27,10 @@ get_template_info_hook_return = 0x20e8fe;
 create_objects_hook_return = 0x2988a7;
 ball_deserialize_hook_return = 0x214036;
 itempipein_spawnball_hook_return = 0x2be7c0;
+get_gooball_name_hook1_return = 0x27b601;
+get_gooball_name_hook2_return = 0x27b740;
+set_state_from_item_hook_return = 0x2c8887;
+set_state_from_ball_hook_return = 0x2c7e67;
 
 SECTIONS
 {
