@@ -221,7 +221,7 @@ itempipein_spawnball_hook:
     jmp itempipein_spawnball_hook_return
 
 gooballname_hook1:
-    mov r8, qword [rel customGooBallIds]
+    mov r8, qword [rel customGooballIds]
     xor edx, edx
     jmp gooballname_hook1_return
 
