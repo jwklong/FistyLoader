@@ -80,7 +80,7 @@ def inject_hooks(file: BufferedRandom, symtab: SymbolTableSection):
     hook_symbol(file, symtab, 0x1402be7b9, "itempipein_spawnball_hook", padding=2)
 
     # GetGooBallName: mov rax, [gooBallIds] -> mov rax, [customGooBallIds]
-    hook_symbol(file, symtab, 0x14027b752, "gooballname_hook")
+    hook_symbol(file, symtab, 0x14027b752, "gooballname_hook", padding=4)
     
     # LoadingScreenRenderer::constructor: lea rdx, ""
     hook_symbol(file, symtab, 0x14035012a, "loading_screen_hook", padding=2)
