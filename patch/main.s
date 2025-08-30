@@ -19,6 +19,8 @@ extern get_template_info_hook_return
 extern create_objects_hook_return
 extern ball_deserialize_hook_return
 extern itempipein_spawnball_hook_return
+extern gooballname_hook_return
+extern gooballname_hook_comp_return
 
 section .fisty
 
@@ -216,6 +218,16 @@ ball_deserialize_hook:
 itempipein_spawnball_hook:
     mov rax, [rel customGooballIds]
     jmp itempipein_spawnball_hook_return
+
+gooballname_hook:
+    test bl, bl
+    jz gooballname_hook_comp
+    lea rdx, [rsp + 0x40]
+    jmp gooballname_hook_return
+
+gooballname_hook_comp:
+    mov rax, [rel customGooBallIds]
+    jmp gooballname_hook_comp_return
 
 ; loading_screen_hook
 ; 
