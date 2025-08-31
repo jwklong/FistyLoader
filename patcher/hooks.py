@@ -93,6 +93,9 @@ def inject_hooks(file: BufferedRandom, symtab: SymbolTableSection):
     
     # ItemPropertiesGizmo::setStateFromBall: lea r9, [gooBallIds] + [...] + mov r8d, 0x26
     hook_symbol(file, symtab, 0x1402c7e53, "set_state_from_ball_hook", padding=2) # padding should be more
+
+    # EditorElementUtils::Initialize
+    hook_symbol(file, symtab, 0x14023b57f, "editor_init_hook")
     
     # Direct asm patches
     # Skip SteamAPI (crashes)

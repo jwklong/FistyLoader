@@ -3,6 +3,8 @@ BITS 64
 extern SDL_ShowSimpleMessageBox
 extern FileSystemUtils_CreateDir
 extern Environment_instance
+extern GetGooBallName
+extern AddEditorButton
 
 extern gooballIds
 
@@ -23,6 +25,7 @@ extern get_gooball_name_hook1_return
 extern get_gooball_name_hook2_return
 extern set_state_from_item_hook_return
 extern set_state_from_ball_hook_return
+extern editor_init_hook_return
 
 section .fisty
 
@@ -277,6 +280,30 @@ set_state_from_ball_hook:
     
     jmp set_state_from_ball_hook_return
 
+editor_init_hook:
+    # finish ball cluster
+    call AddEditorButton
+
+    mov cl, 10 # [rel gooballCount]
+    call editor_init_hook_loop
+
+    jmp editor_init_hook_return
+
+editor_init_hook_loop:
+
+    mov ecx, 0x1
+    call GetGooBallName
+    mov rcx, rax
+    mov dword [rsp + 0x28], r14d
+    lea rax, [rel placeholderBallImage]
+    mov qword [rsp + 0x20], rax
+    xor edx, edx
+    mov r9d, 0x1
+    mov r8d, r9d
+    call AddEditorButton
+
+    dec cl
+    jnz editor_init_hook_loop
 
 %include "patch/ini_extract.s"
 %include "patch/ini_parse.s"
@@ -292,3 +319,5 @@ ballTablePath db "fisty/ballTable.ini", 00h
 baseGooballCount equ 39
 
 loadingText db "Using FistyLoader v1.1", 00h
+
+placeholderBallImage db "IMAGE_EDITOR_UI_BALLCOMMON"

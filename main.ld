@@ -10,6 +10,8 @@ strncopy = 0xaf0210;
 SDL_ShowSimpleMessageBox = 0x8944b0;
 FileSystemUtils_CreateDir = 0x4667c0;
 Environment_instance = 0x41ec40;
+GetGooBallName = 0x27b5b0;
+AddEditorButton = 0x23b0f0;
 
 gooballIds = 0x12eede0;
 empty_string = 0xe8898e;
@@ -31,6 +33,7 @@ get_gooball_name_hook1_return = 0x27b601;
 get_gooball_name_hook2_return = 0x27b740;
 set_state_from_item_hook_return = 0x2c8887;
 set_state_from_ball_hook_return = 0x2c7e67;
+editor_init_hook_return = 0x23b584;
 
 SECTIONS
 {
