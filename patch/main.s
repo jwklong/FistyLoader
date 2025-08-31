@@ -281,10 +281,10 @@ set_state_from_ball_hook:
     jmp set_state_from_ball_hook_return
 
 editor_init_hook:
-    # finish ball cluster
+    ; finish ball cluster
     call AddEditorButton
 
-    mov cl, 10 # [rel gooballCount]
+    mov cl, 10 ; [rel gooballCount]
     call editor_init_hook_loop
 
     jmp editor_init_hook_return
