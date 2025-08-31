@@ -3,3 +3,4 @@ pyelftools
 pyinstaller
 colorama
 readchar
+pyyaml

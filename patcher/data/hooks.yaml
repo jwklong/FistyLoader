@@ -1,0 +1,40 @@
+hooks:
+  # SDL2Environment::loadConfig
+  load_config_hook:
+    target_addr: 0x48a250
+    byte_length: 5
+    
+  # BallFactory::load (before loop)
+  ballfactory_start_hook:
+    target_addr: 0x20e9f2
+    byte_length: 13
+  # BallFactory::load (during loop)
+  ballfactory_loop_hook:
+    target_addr: 0x20ea90
+    byte_length: 6
+  # BallFactory::init: mov ecx, 0xbaf810
+  ballfactory_init_hook:
+    target_addr: 0x20e964
+    byte_length: 5
+  # BallFactory::BallFactory: mov r8d, 0x27
+  ballfactory_constructor_hook1:
+    target_addr: 0x20e2cb
+    byte_length: 6
+  # BallFactory::BallFactory: mov dword [rdi+0x8], 0x27
+  ballfactory_constructor_hook2:
+    target_addr: 0x20e2e6
+    byte_length: 7
+  # BallFactory::getTemplateInfo: inc r9 + cmp r9, 0x27
+  get_template_info_hook:
+    target_addr: 0x20e8f7
+    byte_length: 7
+  
+  # BallTemplateInfoUtils::Deserialize: lea rax, [gooBallIds]
+  ball_deserialize_hook:
+    target_addr: 0x21402f
+    byte_length: 7
+  
+  # EOLGizmo::update: mov rbx, qword [r15+rcx*8+gooballIds]
+  eolgizmo_hook:
+    target_addr: 0x22f400
+    byte_length: 8

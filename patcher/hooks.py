@@ -42,39 +42,23 @@ def hook_symbol(file: BufferedRandom, symtab: SymbolTableSection, virtual_addres
     [symbol] = symbols
     hook_addr(file, virtual_address, 0x140000000 | symbol.entry.st_value, padding=padding)
 
-def inject_hooks(file: BufferedRandom, symtab: SymbolTableSection):
+def inject_hooks(file: BufferedRandom, symtab: SymbolTableSection, hooks: dict):
     print("Injecting hooks...")
     
+    for symbol_name, args in hooks.items():
+        target_addr = args['target_addr']
+        assert isinstance(target_addr, int), f"'target_addr' field has to be an int ({symbol_name!r})"
+        
+        byte_length = args['byte_length']
+        assert isinstance(byte_length, int), f"'byte_length' field has to be an int ({symbol_name!r})"
+        assert byte_length >= 5, f"byte_length has to be at least 5 ({symbol_name!r})"
+        
+        hook_symbol(file, symtab, 0x140000000 | target_addr, symbol_name, padding=byte_length - 5)
+    
     # Hooks
-    # SDL2Environment::loadConfig
-    hook_symbol(file, symtab, 0x14048a250, "load_config_hook")
-    
-    # EOLGizmo::update: mov rbx, qword [r15+rcx*8+gooballIds]
-    hook_symbol(file, symtab, 0x14022f400, "eolgizmo_hook", padding=3)
-    
-    # BallFactory::load (before loop)
-    hook_symbol(file, symtab, 0x14020e9f2, "ballfactory_start_hook", padding=8)
-    
-    # BallFactory::load (during loop)
-    hook_symbol(file, symtab, 0x14020ea90, "ballfactory_loop_hook", padding=1)
-    
-    # BallFactory::init: mov ecx, 0xbaf810
-    hook_symbol(file, symtab, 0x14020e964, "ballfactory_init_hook")
-    
-    # BallFactory::BallFactory: mov r8d, 0x27
-    hook_symbol(file, symtab, 0x14020e2cb, "ballfactory_constructor_hook1", padding=1)
-    
-    # BallFactory::BallFactory: mov dword [rdi+0x8], 0x27
-    hook_symbol(file, symtab, 0x14020e2e6, "ballfactory_constructor_hook2", padding=2)
-    
-    # BallFactory::getTemplateInfo: inc r9 + cmp r9, 0x27
-    hook_symbol(file, symtab, 0x14020e8f7, "get_template_info_hook", padding=2)
     
     # Item::createObjects: movss xmm3, 38.0
     hook_symbol(file, symtab, 0x14029889f, "create_objects_hook", padding=3)
-    
-    # BallTemplateInfoUtils::Deserialize: lea rax, [gooBallIds]
-    hook_symbol(file, symtab, 0x14021402f, "ball_deserialize_hook", padding=2)
     
     # ItemPipeIn::spawnBall: lea rax, [gooBallIds] -> mov rax, [customGooBallIds]
     hook_symbol(file, symtab, 0x1402be7b9, "itempipein_spawnball_hook", padding=2)
