@@ -94,6 +94,9 @@ def inject_hooks(file: BufferedRandom, symtab: SymbolTableSection):
     # ItemPropertiesGizmo::setStateFromBall: lea r9, [gooBallIds] + [...] + mov r8d, 0x26
     hook_symbol(file, symtab, 0x1402c7e53, "set_state_from_ball_hook", padding=2) # padding should be more
     
+    # LauncherUtils::tryShootBall (?): lea rdx, [gooBallIds]
+    hook_symbol(file, symtab, 0x1402db789, "try_shoot_ball_hook", padding=2)
+    
     # Direct asm patches
     # Skip SteamAPI (crashes)
     # overwrite_bytes(file, 0x14041a75f, NOP_SEQUENCES[5])

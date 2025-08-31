@@ -23,6 +23,7 @@ extern get_gooball_name_hook1_return
 extern get_gooball_name_hook2_return
 extern set_state_from_item_hook_return
 extern set_state_from_ball_hook_return
+extern try_shoot_ball_hook_return
 
 section .fisty
 
@@ -267,7 +268,7 @@ set_state_from_item_hook:
 
 ; set_state_from_ball_hook
 ;
-; Hooks into ItemPropertiesGizmo::setStateFromBall and un-hardcodes
+; Hooks into ItemPropertiesGizmo::setStateFromBall and unhardcodes
 ; gooBallIds and gooballCount
 set_state_from_ball_hook:
     mov r8d, [rel gooballCount]
@@ -276,6 +277,14 @@ set_state_from_ball_hook:
     sub r8d, 1
     
     jmp set_state_from_ball_hook_return
+
+
+; try_shoot_ball_hook
+;
+; Hooks into LauncherUtils::tryShootBall (?) and unhardcodes gooballIds
+try_shoot_ball_hook:
+    mov rdx, [rel customGooballIds]
+    jmp try_shoot_ball_hook_return
 
 
 %include "patch/ini_extract.s"
