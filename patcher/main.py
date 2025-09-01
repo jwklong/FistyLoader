@@ -6,6 +6,7 @@ import sys
 from pefile import PE, SectionStructure
 from elftools.elf.elffile import ELFFile
 from elftools.elf.sections import SymbolTableSection
+import yaml
 
 from hooks import inject_hooks
 
@@ -27,7 +28,7 @@ def add_section_header(pe: PE, section_size: int):
     
     print(f"Virtual address of new section: 0x{section.VirtualAddress:x}")
 
-def patch_game(file: BufferedRandom, game_bytes: bytes, section_content: bytes, symtab: SymbolTableSection):
+def patch_game(file: BufferedRandom, game_bytes: bytes, section_content: bytes, symtab: SymbolTableSection, hooks: dict):
     fisty_section_size = int.from_bytes(game_bytes[0x3d8:0x3dc], byteorder='little')
     fisty_section_offset = int.from_bytes(game_bytes[0x3dc:0x3e0], byteorder='little')
     
@@ -38,7 +39,7 @@ def patch_game(file: BufferedRandom, game_bytes: bytes, section_content: bytes, 
     
     file.seek(fisty_section_offset)
     file.write(section_content)
-    inject_hooks(file, symtab)
+    inject_hooks(file, symtab, hooks)
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
@@ -48,12 +49,14 @@ def resource_path(relative_path):
 def dev_main():
     custom_code_path = resource_path('custom_code.bin')
     custom_code_symbols_path = resource_path('custom_code_symbols.o')
+    hooks_path = resource_path('data/hooks.yaml')
     
     with open(custom_code_path, 'rb') as f:
         section_content = f.read()
-        
     with open(custom_code_symbols_path, 'rb') as f:
         symbols_bin = f.read()
+    with open(hooks_path, 'r') as f:
+        hooks_str = f.read()
     
     if not isfile('out.exe') or (len(argv) >= 2 and argv[1] in ['--clean', '-c']):
         print('Reading WorldofGoo2.exe...')
@@ -69,8 +72,10 @@ def dev_main():
     symbols = ELFFile(BytesIO(symbols_bin))
     symtab: SymbolTableSection = symbols.get_section_by_name(".symtab")
     
+    hooks = yaml.safe_load(hooks_str)['hooks']
+    
     with open('out.exe', 'rb+') as f:
-        patch_game(f, f.read(), section_content, symtab)
+        patch_game(f, f.read(), section_content, symtab, hooks)
 
 if __name__ == '__main__':
     dev_main()
