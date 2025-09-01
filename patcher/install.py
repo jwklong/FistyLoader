@@ -17,14 +17,19 @@ def install():
     
     custom_code_path = resource_path('custom_code.bin')
     custom_code_symbols_path = resource_path('custom_code_symbols.o')
+    hooks_path = resource_path('data/hooks.yaml')
     
     with open(custom_code_path, 'rb') as f:
         section_content = f.read()
     with open(custom_code_symbols_path, 'rb') as f:
         symbols_bin = f.read()
+    with open(hooks_path, 'r') as f:
+        hooks_str = f.read()
     
     symbols = ELFFile(BytesIO(symbols_bin))
     symtab: SymbolTableSection = symbols.get_section_by_name(".symtab")
+
+    hooks = yaml.safe_load(hooks_str)['hooks']
     
     # Get user input
     try:
@@ -76,7 +81,7 @@ def install():
             f.seek(0)
             f.write(modified)
             
-            patch_game(f, bytes(modified), section_content, symtab)
+            patch_game(f, bytes(modified), section_content, symtab, hooks)
         except KeyboardInterrupt:
             print("Restoring original...")
             
