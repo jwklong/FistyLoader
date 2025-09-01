@@ -17,7 +17,7 @@ def install():
     
     custom_code_path = resource_path('custom_code.bin')
     custom_code_symbols_path = resource_path('custom_code_symbols.o')
-    hooks_path = resource_path('data\\hooks.yaml' if os.name == 'nt' else 'data/hooks.yaml')
+    hooks_path = resource_path('hooks.yaml')
     
     with open(custom_code_path, 'rb') as f:
         section_content = f.read()
