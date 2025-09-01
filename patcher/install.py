@@ -1,4 +1,5 @@
 import os
+import yaml
 from hashlib import sha1
 from pathlib import Path
 from sys import exit
