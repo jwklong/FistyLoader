@@ -25,6 +25,8 @@ extern set_state_from_item_hook_return
 extern set_state_from_ball_hook_return
 extern try_shoot_ball_hook_return
 
+extern loadBallTable
+
 section .fisty
 
 global customGooballIds
@@ -50,32 +52,8 @@ load_config_hook:
     mov rbp, rsp
     sub rsp, 64 + 128
     
-    ; FileSystemUtils::CreateDir
-    lea rcx, [rel fistyPath]
-    call FileSystemUtils_CreateDir
-    
-    ; Environment::instance
-    call Environment_instance
-    
-    ; Environment::getStorage (vtable[0x28])
-    mov rdx, qword [rax] ; rdx = env->vtable
-    mov rcx, rax
-    call qword [rdx + 0x150]
-    mov rbx, rax ; rbx = SDL2Storage* storage
-    
-    ; SDL2Storage::FileExists (vtable[1])
-    ; I'm just going to ignore the TOCTOU "vulnerability" here
-    mov r12, qword [rbx] ; r12 = storage->vtable
-    mov rcx, rbx ; this
-    lea rdx, [rel ballTablePath] ; filePath
-    call qword [r12+0x8]
-    test al, al
-    je load_config_hook_create_balltable ; skip the following code if ballTable.ini exists already and load the config instead
-    
-    mov rcx, rbx ; SDL2Storage* storage
-    call load_ball_table
+    call loadBallTable
 
-load_config_hook_merge:
     add rsp, 64 + 128
     
     pop r12
@@ -91,27 +69,6 @@ load_config_hook_merge:
     ; softbranch
     mov qword [rsp+8], rbx
     jmp load_config_hook_return
-
-load_config_hook_create_balltable:
-    ; load vanilla gooball table into custom table
-    lea rax, [rel gooballIds]
-    mov qword [rel customGooballIds], rax
-    mov qword [rel gooballCount], baseGooballCount
-    
-    ; Generate the config file
-    mov rcx, rbx ; SDL2Storage* storage
-    call create_ball_table
-    
-    test rax, rax
-    je load_config_hook_merge
-    
-    ; SDL_ShowSimpleMessageBox
-    mov ecx, 0x40
-    lea rdx, [rel msgTitle]
-    lea r8, [rel msgBallTableCreateSuccess]
-    xor r9, r9
-    call SDL_ShowSimpleMessageBox
-    jmp load_config_hook_merge
 
 
 ; eolgizmo_hook
@@ -296,10 +253,6 @@ try_shoot_ball_hook:
 
 ; constants
 msgTitle db "Fisty Loader", 00h
-msgBallTableCreateSuccess db \
-    "Successfully extracted assets from exe file into 'World of Goo 2 (current installation's game directory)/game/fisty'", 00h
-
-fistyPath db "fisty", 00h
 ballTablePath db "fisty/ballTable.ini", 00h
 
 baseGooballCount equ 39

@@ -4,6 +4,8 @@
 
 extern "C" {
 
+#define BASE_GOOBALL_COUNT 39
+
 const char ballTablePath[] = "fisty/ballTable.ini";
 
 void loadBallTable() {
@@ -16,7 +18,7 @@ void loadBallTable() {
         load_ball_table(storage);
     } else {
         customGooballIds = gooballIds;
-        gooballCount = 39;
+        gooballCount = BASE_GOOBALL_COUNT;
         
         create_ball_table(storage);
         
