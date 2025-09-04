@@ -5,7 +5,7 @@ assemble() {
 }
 
 compile() {
-    gcc -c -I include -mabi=ms -O2 -o patch/build/ballTable.o patch/src/ballTable.cpp
+    gcc -c -I include -mabi=ms -O2 -fno-stack-protector -o patch/build/ballTable.o patch/src/ballTable.cpp
 }
 
 link() {

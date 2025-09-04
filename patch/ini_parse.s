@@ -6,6 +6,9 @@ extern get_errno
 extern strtol
 extern strncopy
 extern empty_string
+extern snprintf
+
+extern createBallTable
 
 global load_ball_table
 
@@ -266,7 +269,7 @@ load_ball_table_error:
     call qword [r12+0x28]
     
     ; Regenerate ballTable.ini
-    call create_ball_table
+    call createBallTable
     
 load_ball_table_error_merge:
     ; load vanilla gooball table into custom table

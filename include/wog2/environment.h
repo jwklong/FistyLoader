@@ -2,18 +2,21 @@
 
 #define UNK_RETURN void
 
+typedef void* FileHandle;
+
 class Storage {
 public:
     // in gcc, the destructor takes up two vtable slots, in msvc only 1
     virtual void destructorWorkaround();
     
     virtual bool FileExists(const char* filePath);
-    virtual UNK_RETURN FileOpen();
-    virtual UNK_RETURN FileRead();
-    virtual UNK_RETURN FileWrite();
-    virtual UNK_RETURN FileClose();
-    virtual UNK_RETURN FileFlush();
-    virtual UNK_RETURN FileGetSize();
+    virtual bool FileOpen(const char* filePath, int flags, FileHandle* out_fileHandle);
+    virtual bool FileRead(FileHandle fileHandle, void* out_content, int size);
+    virtual bool FileWrite(FileHandle fileHandle, const void* content, int size);
+    virtual bool FileClose(FileHandle fileHandle);
+    virtual bool FileFlush(FileHandle fileHandle);
+    virtual long FileGetSize(FileHandle fileHandle);
+    
     virtual UNK_RETURN FindFilesInPack();
 };
 

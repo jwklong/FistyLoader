@@ -25,7 +25,7 @@ extern set_state_from_item_hook_return
 extern set_state_from_ball_hook_return
 extern try_shoot_ball_hook_return
 
-extern loadBallTable
+extern initBallTable
 
 section .fisty
 
@@ -52,7 +52,8 @@ load_config_hook:
     mov rbp, rsp
     sub rsp, 64 + 128
     
-    call loadBallTable
+    ; TODO: which registers does this clobber? (so i can get rid of some of the pushes and pops)
+    call initBallTable
 
     add rsp, 64 + 128
     
@@ -248,7 +249,6 @@ try_shoot_ball_hook:
     jmp try_shoot_ball_hook_return
 
 
-%include "patch/ini_extract.s"
 %include "patch/ini_parse.s"
 
 ; constants
