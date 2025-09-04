@@ -7,13 +7,15 @@ extern strtol
 extern strncopy
 extern empty_string
 
+global load_ball_table
+
 ; load_ball_table
 ;
 ; Parses the ballTable.ini file and loads the result into customGooballIds and gooballCount
 ;
-; Input: rbx - SDL2Storage* storage
+; Input: rcx - SDL2Storage* storage
 ; Returns: N/A
-; Clobbers: rax, rcx, r8, r9, r10, r11 flags
+; Clobbers: rax, rcx, r8, r9, r10, r11, flags
 load_ball_table:
     push rbp
     push rbx
@@ -26,12 +28,13 @@ load_ball_table:
     mov rbp, rsp
     sub rsp, 0x30 + 0x110 + 0x20
     
+    mov rbx, rcx
     ; read ballTable.ini into new buffer
     ; r12 = storage->vtable
-    mov r12, qword [rbx]
+    mov r12, qword [rcx]
     
     ; SDL2Storage::FileOpen (vtable[2])
-    mov rcx, rbx ; this
+    ; rcx = this
     lea rdx, [rel ballTablePath] ; filePath
     mov r8, 0x11 ; flags (0x11 : "rb")
     lea r9, [rbp-0x8] ; out_fileHandle

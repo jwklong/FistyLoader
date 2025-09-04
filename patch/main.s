@@ -27,6 +27,8 @@ extern try_shoot_ball_hook_return
 
 section .fisty
 
+global customGooballIds
+global gooballCount
 customGooballIds dq 0
 gooballCount dq 0
 
@@ -70,7 +72,7 @@ load_config_hook:
     test al, al
     je load_config_hook_create_balltable ; skip the following code if ballTable.ini exists already and load the config instead
     
-    ; storage passed in as rbx
+    mov rcx, rbx ; SDL2Storage* storage
     call load_ball_table
 
 load_config_hook_merge:
@@ -97,7 +99,9 @@ load_config_hook_create_balltable:
     mov qword [rel gooballCount], baseGooballCount
     
     ; Generate the config file
+    mov rcx, rbx ; SDL2Storage* storage
     call create_ball_table
+    
     test rax, rax
     je load_config_hook_merge
     

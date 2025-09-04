@@ -1,12 +1,14 @@
 extern snprintf
 
+global create_ball_table
+
 ; create_ball_table
 ;
 ; Creates ballTable.ini and extracts the default gooballIds table into it.
 ;
-; Input: rbx - SDL2Storage* storage
+; Input: rcx - SDL2Storage* storage
 ; Result: rax - bool success (1 if success, 0 if error)
-; Clobbers: ?
+; Clobbers: r11, flags
 create_ball_table:
     push rbp
     push r12
@@ -16,10 +18,11 @@ create_ball_table:
     mov rbp, rsp
     sub rsp, 0x28 + 0x80 + 0x20
     
-    mov r12, qword [rbx] ; r12 = storage->vtable
+    mov rbx, rcx
+    mov r12, qword [rcx] ; r12 = storage->vtable
     
     ; SDL2Storage::FileOpen (vtable[2])
-    mov rcx, rbx ; this
+    ; rcx = this
     lea rdx, [rel ballTablePath] ; filePath
     mov r8, 0x22 ; flags (0x22 : "w+b")
     lea r9, [rbp-0x10] ; out_fileHandle
