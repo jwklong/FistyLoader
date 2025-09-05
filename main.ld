@@ -5,7 +5,7 @@ isspace = 0xb103c0;
 set_errno = 0xb11984;
 get_errno = 0xb118f0;
 strtol = 0x454d;
-strncopy = 0xaf0210;
+strncpy = 0xaf0210;
 
 SDL_ShowSimpleMessageBox = 0x8944b0;
 FileSystemUtils_CreateDir = 0x4667c0;

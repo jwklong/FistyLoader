@@ -4,7 +4,7 @@ extern isspace
 extern set_errno
 extern get_errno
 extern strtol
-extern strncopy
+extern strncpy
 extern empty_string
 extern snprintf
 
@@ -182,7 +182,7 @@ load_ball_table_second_loop_start:
     mov rdx, rcx ; src
     mov rcx, r15 ; dest
     mov r8, rax ; count
-    call strncopy
+    call strncpy
     
     mov byte [r15+rbx], 0 ; null terminator
     

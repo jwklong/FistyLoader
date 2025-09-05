@@ -15,7 +15,7 @@ public:
     virtual bool FileWrite(FileHandle fileHandle, const void* content, int size);
     virtual bool FileClose(FileHandle fileHandle);
     virtual bool FileFlush(FileHandle fileHandle);
-    virtual long FileGetSize(FileHandle fileHandle);
+    virtual int FileGetSize(FileHandle fileHandle);
     
     virtual UNK_RETURN FindFilesInPack();
 };

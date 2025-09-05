@@ -39,7 +39,7 @@ gooballCount dq 0
 ; Hooks into SDL2Environment::loadConfig to generate the fisty/ballTable.ini file
 ; if it doesn't already exist or load the file if it does.
 load_config_hook:
-    push rbx
+    ; push rbx
     push rcx
     push rdx
     push rbp
@@ -47,7 +47,7 @@ load_config_hook:
     push r9
     push r10
     push r11
-    push r12
+    ; push r12
     
     mov rbp, rsp
     sub rsp, 64 + 128
@@ -57,7 +57,7 @@ load_config_hook:
 
     add rsp, 64 + 128
     
-    pop r12
+    ; pop r12
     pop r11
     pop r10
     pop r9
@@ -65,7 +65,7 @@ load_config_hook:
     pop rbp
     pop rdx
     pop rcx
-    pop rbx
+    ; pop rbx
     
     ; softbranch
     mov qword [rsp+8], rbx

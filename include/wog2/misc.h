@@ -5,7 +5,15 @@
 extern "C" {
     extern const char* gooballIds[0x27];
     
-    int snprintf ( char * s, size_t n, const char * format, ... );
+    // i love having to define all C std functions i use myself
+    int snprintf( char * s, size_t n, const char * format, ... );
+    char* strncpy( char* dest, const char* src, size_t count );
+    void* malloc( size_t size );
+    void free( void *ptr );
+    int set_errno( int error_value );
+    int get_errno( int * pValue );
+    long strtol( const char* str, char** str_end, int base );
+    int isspace( int ch );
     
     void FileSystemUtils_CreateDir(const char* path);
     
