@@ -30,6 +30,7 @@ bool createBallTable(Storage* storage);
 void loadBallTable(Storage* storage);
 static ReadLineResult readLine(const char* inputFile, int& i, int fileSize,
         int& out_ballId, int& out_contentLen, const char*& out_content);
+static void fixBallTable(Storage* storage, const char* inputFile, int fileSize, int lineNumber);
 static char skipSpaces(const char* inputFile, int& i, int fileSize);
 static int readWord(const char* inputFile, int& i, int fileSize, const char*& result);
 
@@ -125,7 +126,7 @@ void loadBallTable(Storage* storage) {
             case ReadLineResult::EMPTY_LINE:
                 continue;
             case ReadLineResult::ERROR:
-                // TODO: Error
+                fixBallTable(storage, inputFile, fileSize, lineNumber);
                 return;
         }
         
@@ -138,7 +139,8 @@ void loadBallTable(Storage* storage) {
     }
     
     if (maxGooballId == 0) {
-        // TODO: error
+        fixBallTable(storage, inputFile, fileSize, 1);
+        return;
     }
     
     int gooballIdCount = maxGooballId + 1;
@@ -181,6 +183,40 @@ void loadBallTable(Storage* storage) {
     gooballCount = gooballIdCount;
     
     free(inputFile);
+}
+
+static void fixBallTable(Storage* storage, const char* inputFile, int fileSize, int lineNumber) {
+    char buffer[0x110];
+    snprintf(buffer, sizeof(buffer),
+        "Error reading ballTable.ini in line %d.\n"
+        "Copying current ballTable file to 'ballTable_backup.ini'\n"
+        "and regenerating ballTable.\n"
+        "Continuing with default settings.", lineNumber);
+    
+    SDL_ShowSimpleMessageBox(0x10, "Fisty Loader", buffer, 0);
+    
+    // Backup ballTable into ballTable_backup.ini and regenerate
+    FileHandle handle;
+    int result = storage->FileOpen("fisty/ballTable_backup.ini", 0x22, &handle); // 0x22 = "w+b"
+    
+    if (result == 0) {
+        storage->FileWrite(handle, inputFile, fileSize);
+        storage->FileClose(handle);
+        
+        createBallTable(storage);
+    } else {
+        // Failure to back up ballTable
+        SDL_ShowSimpleMessageBox(0x10, "Fisty Loader",
+            "Failed to create ballTable_backup.ini.\n"
+            "ballTable.ini will not be modified.\n"
+            "If you wish to still have it be regenerated,\n"
+            "delete the file and start the game again.\n"
+            "Continuing with default settings.", 0);
+    }
+    
+    // Load default values
+    customGooballIds = gooballIds;
+    gooballCount = BASE_GOOBALL_COUNT;
 }
 
 // Reads one line of ballTable.ini until it encounters an equals sign (=)

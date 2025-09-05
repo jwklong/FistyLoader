@@ -5,6 +5,4 @@
 extern "C" {
     extern const char** customGooballIds;
     extern long gooballCount;
-    
-    void load_ball_table(Storage* storage);
 };

@@ -248,9 +248,6 @@ try_shoot_ball_hook:
     mov rdx, [rel customGooballIds]
     jmp try_shoot_ball_hook_return
 
-
-%include "patch/ini_parse.s"
-
 ; constants
 msgTitle db "Fisty Loader", 00h
 ballTablePath db "fisty/ballTable.ini", 00h
