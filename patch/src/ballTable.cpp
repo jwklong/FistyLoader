@@ -2,12 +2,35 @@
 #include "wog2/environment.h"
 #include "ballTable.h"
 
+// static Storage* printStorage;
+// static FileHandle printHandle;
+
+// void initPrint(Storage* storage, FileHandle handle) {
+//     printStorage = storage;
+//     printHandle = handle;
+// }
+
+// template<typename... Ts>
+// void print(const char* fmt, Ts... args) {
+//     char buffer[0x80];
+//     int size = snprintf(buffer, sizeof(buffer), fmt, args...);
+//     printStorage->FileWrite(printHandle, buffer, size);
+//     printStorage->FileFlush(printHandle);
+// }
+
 extern "C" {
+
+enum class ReadLineResult {
+    SUCCESS,
+    EMPTY_LINE,
+    ERROR,
+};
 
 bool createBallTable(Storage* storage);
 void loadBallTable(Storage* storage);
-static int readLineUntilEquals(const char* inputFile, int& i, int fileSize);
-static int readLineTrimmed(const char* inputFile, int& i, int fileSize, const char*& contentPtr);
+static ReadLineResult readLine(const char* inputFile, int& i, int fileSize,
+        int& out_ballId, int& out_contentLen, const char*& out_content);
+static char skipSpaces(const char* inputFile, int& i, int fileSize);
 static int readWord(const char* inputFile, int& i, int fileSize, const char*& result);
 
 #define BASE_GOOBALL_COUNT 39
@@ -82,6 +105,9 @@ void loadBallTable(Storage* storage) {
     
     storage->FileClose(handle);
     
+    // storage->FileOpen("log2.txt", 0x22, &handle); // 0x11 = "rb"
+    // initPrint(storage, handle);
+    
     // parse ini content
     int maxGooballId = -1;
     int stringBufSize = 0;
@@ -91,24 +117,20 @@ void loadBallTable(Storage* storage) {
     for (int i = 0; i < fileSize; i++) {
         lineNumber += 1;
         
-        // read left hand side of line
-        int id = readLineUntilEquals(inputFile, i, fileSize);
+        int ballId;
+        int contentLen;
+        const char* content;
         
-        if (id == -1)
-            continue;
-        if (id <= -2) {
-            // TODO: error
+        switch (readLine(inputFile, i, fileSize, ballId, contentLen, content)) {
+            case ReadLineResult::EMPTY_LINE:
+                continue;
+            case ReadLineResult::ERROR:
+                // TODO: Error
+                return;
         }
         
-        if (id > maxGooballId)
-            maxGooballId = id;
-        
-        // inputFile[i] should now be pointing to an '=' sign
-        i++;
-        
-        // read right hand side of line
-        const char* content;
-        int contentLen = readLineTrimmed(inputFile, i, fileSize, content);
+        if (ballId > maxGooballId)
+            maxGooballId = ballId;
         
         if (contentLen != 0) {
             stringBufSize += contentLen + 1;
@@ -137,15 +159,13 @@ void loadBallTable(Storage* storage) {
     
     // populate gooballIds and stringBuf
     for (int i = 0; i < fileSize; i++) {
-        int id = readLineUntilEquals(inputFile, i, fileSize);
-        
-        if (id == -1)
-            continue;
-        
-        i++;
-        
+        int ballId;
+        int contentLen;
         const char* content;
-        int contentLen = readLineTrimmed(inputFile, i, fileSize, content);
+        
+        if (readLine(inputFile, i, fileSize, ballId, contentLen, content) == ReadLineResult::EMPTY_LINE) {
+            continue;
+        }
         
         if (contentLen == 0)
             continue;
@@ -153,7 +173,7 @@ void loadBallTable(Storage* storage) {
         strncpy(stringBuf, content, contentLen);
         stringBuf[contentLen] = 0;
         
-        gooballIds[id] = stringBuf;
+        gooballIds[ballId] = stringBuf;
         stringBuf += contentLen + 1;
     }
     
@@ -166,79 +186,76 @@ void loadBallTable(Storage* storage) {
 // Reads one line of ballTable.ini until it encounters an equals sign (=)
 // and parses the left hand side into an integer if it does.
 // 
-// Returns the left hand side if it is a valid integer.
-// Returns -1 if it encountered an end of line before an '=' sign.
-// Returns -2 if the left hand side is not a valid integer or another misc error occured.
-static int readLineUntilEquals(const char* inputFile, int& i, int fileSize) {
+// After this function is done, `i` will point to the '\n' character
+// at the end of the line.
+static ReadLineResult readLine(const char* inputFile, int& i, int fileSize,
+        int& out_ballId, int& out_contentLen, const char*& out_content) {
+    
+    // Read lhs
     const char* lhsStart;
     int lhsLength = readWord(inputFile, i, fileSize, lhsStart);
     
-    // skip ahead until '=' sign
-    for (; i < fileSize; i++) {
-        char c = inputFile[i];
-        
-        switch (c) {
-            // Did not encounter '=' sign, so skip until after the next EOL
-            case ';':
-                for (; i < fileSize && inputFile[i] != '\n'; i++) {}
-                // fall through
-            case '\n':
-                return -1;
-            
-            // Parse lhs into an integer
-            case '=':
-                // print("lhs %d '", lhsLength);
-                // printStorage->FileWrite(printHandle, lhsStart, lhsLength);
-                // print("'\n");
-                
-                set_errno(0);
-                char* str_end;
-                int lhs = strtol(lhsStart, &str_end, 10);
-                
-                int errno;
-                get_errno(&errno);
-                if (errno != 0) {
-                    return -3;
-                }
-                
-                // Make sure it read the correct amount of characters and the number is not negative
-                int charsRead = str_end - lhsStart;
-                if (charsRead != lhsLength || lhs < 0) {
-                    return -4;
-                }
-                
-                return lhs;
-        }
-        
-        if (!isspace(c)) {
-            return -5;
-        }
+    // Skip ahead until '=' sign
+    switch (skipSpaces(inputFile, i, fileSize)) {
+        case '\n':
+            return ReadLineResult::EMPTY_LINE;
+        case '=':
+            i++;
+            break;
+        default:
+            return ReadLineResult::ERROR;
     }
     
-    return -1;
+    // Read rhs
+    int rhsLength = readWord(inputFile, i, fileSize, out_content);
+    
+    // Skip ahead until newline
+    if (skipSpaces(inputFile, i, fileSize) != '\n') {
+        return ReadLineResult::ERROR;
+    }
+
+    // Parse lhs into integer
+    set_errno(0);
+    char* str_end;
+    int lhs = strtol(lhsStart, &str_end, 10);
+    
+    int errno;
+    get_errno(&errno);
+    if (errno != 0) {
+        return ReadLineResult::ERROR;
+    }
+    
+    // Make sure it read the correct amount of characters and the number is not negative
+    int charsRead = str_end - lhsStart;
+    if (charsRead != lhsLength || lhs < 0) {
+        return ReadLineResult::ERROR;
+    }
+    
+    out_ballId = lhs;
+    out_contentLen = rhsLength;
+    return ReadLineResult::SUCCESS;
 }
 
-static int readLineTrimmed(const char* inputFile, int& i, int fileSize, const char*& contentPtr) {
-    int length = readWord(inputFile, i, fileSize, contentPtr);
-    
-    // skip ahead until newline
+// Advances `i` until it no longer points to a space ('\n' not included) and returns that
+// character.
+// When it hits a ';', it will skip everything until the end of line.
+static char skipSpaces(const char* inputFile, int& i, int fileSize) {
     for (; i < fileSize; i++) {
-        char c = inputFile[i];
-        
-        switch (c) {
+        switch (inputFile[i]) {
             case ';':
                 for (; i < fileSize && inputFile[i] != '\n'; i++) {}
                 // fall through
             case '\n':
-                return length;
+            case '=':
+                return inputFile[i];
         }
         
-        if (!isspace(c)) {
-            // TODO: error
+        if (!isspace(inputFile[i])) {
+            return inputFile[i];
         }
     }
     
-    return length;
+    return '\0';
 }
 
 static int readWord(const char* inputFile, int& i, int fileSize, const char*& result) {
