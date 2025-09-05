@@ -234,7 +234,10 @@ static ReadLineResult readLine(const char* inputFile, int& i, int fileSize,
     // Skip ahead until '=' sign
     switch (skipSpaces(inputFile, i, fileSize)) {
         case '\n':
-            return ReadLineResult::EMPTY_LINE;
+            if (lhsLength == 0)
+                return ReadLineResult::EMPTY_LINE;
+            else
+                return ReadLineResult::ERROR;
         case '=':
             i++;
             break;
@@ -246,8 +249,12 @@ static ReadLineResult readLine(const char* inputFile, int& i, int fileSize,
     int rhsLength = readWord(inputFile, i, fileSize, out_content);
     
     // Skip ahead until newline
-    if (skipSpaces(inputFile, i, fileSize) != '\n') {
-        return ReadLineResult::ERROR;
+    switch (skipSpaces(inputFile, i, fileSize)) {
+        case '\n':
+        case '\0':
+            break;
+        default:
+            return ReadLineResult::ERROR;
     }
 
     // Parse lhs into integer
