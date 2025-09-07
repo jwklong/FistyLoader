@@ -2,6 +2,16 @@
 
 #include <cstddef>
 
+template<typename T>
+class PackedArray {
+public:
+    int count;
+    int field_0x4;
+    int field_0x8;
+    int field_0xc;
+    T values[32];
+};
+
 extern "C" {
     extern const char* gooballIds[0x27];
     
