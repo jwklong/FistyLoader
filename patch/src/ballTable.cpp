@@ -1,22 +1,8 @@
 #include "wog2/misc.h"
 #include "wog2/environment.h"
+#include "wog2/templateInfo.h"
 #include "ballTable.h"
-
-// static Storage* printStorage;
-// static FileHandle printHandle;
-
-// void initPrint(Storage* storage, FileHandle handle) {
-//     printStorage = storage;
-//     printHandle = handle;
-// }
-
-// template<typename... Ts>
-// void print(const char* fmt, Ts... args) {
-//     char buffer[0x80];
-//     int size = snprintf(buffer, sizeof(buffer), fmt, args...);
-//     printStorage->FileWrite(printHandle, buffer, size);
-//     printStorage->FileFlush(printHandle);
-// }
+#include "log.h"
 
 extern "C" {
 
@@ -49,6 +35,12 @@ void initBallTable() {
     
     Environment* environment = Environment_instance();
     Storage* storage = environment->getStorage();
+    
+#ifdef ENABLE_LOGGING
+    FileHandle handle;
+    storage->FileOpen("log.txt", 0x22, &handle);
+    initPrint(storage, handle);
+#endif
     
     if (storage->FileExists(ballTablePath)) {
         loadBallTable(storage);

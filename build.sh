@@ -1,11 +1,14 @@
-#!/bin/sh
+#!/bin/bash
 assemble() {
     mkdir -p patch/build
     nasm patch/main.s -f elf64 -o patch/build/main.o
 }
 
 compile() {
-    gcc -c -I include -mabi=ms -O2 -fno-stack-protector -o patch/build/ballTable.o patch/src/ballTable.cpp
+    if [ "$ENABLE_LOGGING" == 1 ]; then
+        CFLAGS="-D ENABLE_LOGGING"
+    fi
+    gcc -c -I include -mabi=ms -O2 -fno-stack-protector $CFLAGS -o patch/build/ballTable.o patch/src/ballTable.cpp
 }
 
 link() {

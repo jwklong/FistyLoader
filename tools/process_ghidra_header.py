@@ -12,9 +12,9 @@ def write_undefined_field(out_lines: list[str], field_name: str | None, field_si
         return
     
     if field_size == 3:
-        out_lines.append(f"\tchar {field_name}[3];")
+        out_lines.append(f"    char {field_name}[3];")
     else:
-        out_lines.append(f"\t{INT_TYPES[field_size - 1]} {field_name};")
+        out_lines.append(f"    {INT_TYPES[field_size - 1]} {field_name};")
 
 def collapse_undefined(lines: list[str]) -> list[str]:
     result: list[str] = []
@@ -24,6 +24,7 @@ def collapse_undefined(lines: list[str]) -> list[str]:
     
     for line in lines:
         if line == "};":
+            write_undefined_field(result, undefined_field, undefined_field_size)
             result.append(line)
             return result
         
@@ -52,7 +53,7 @@ def collapse_undefined(lines: list[str]) -> list[str]:
                 field_name = f"field_{hex(field_offset)}"
             
             array_suffix = f"[{array_count}]" if array_count is not None else ""
-            result.append(f"\t{type_name} {field_name}{array_suffix};")
+            result.append(f"    {type_name} {field_name}{array_suffix};")
         else:
             field_size = 1 if type_name == 'undefined' else int(type_name[9:])
             
@@ -71,8 +72,6 @@ def collapse_undefined(lines: list[str]) -> list[str]:
                     write_undefined_field(result, undefined_field, undefined_field_size)
                     undefined_field = field_name
                     undefined_field_size = field_size
-            
-            # print('\t', undefined_field, undefined_field_size)
     
     raise ValueError(f"Could not find end of struct {argv[1]}")
 
@@ -87,7 +86,7 @@ def write_undefined_field_array(out_lines: list[str], field_name: str | None, fi
     else:
         array_suffix = ""
     
-    out_lines.append(f"\t{field_type} {field_name}{array_suffix};")
+    out_lines.append(f"    {field_type} {field_name}{array_suffix};")
 
 def collapse_unk_into_arrays(lines: list[str]) -> list[str]:
     result: list[str] = []
@@ -98,6 +97,7 @@ def collapse_unk_into_arrays(lines: list[str]) -> list[str]:
     
     for line in lines:
         if line == "};":
+            write_undefined_field_array(result, undefined_field, undefined_field_type, undefined_field_count)
             result.append(line)
             return result
         
@@ -116,7 +116,7 @@ def collapse_unk_into_arrays(lines: list[str]) -> list[str]:
             undefined_field_count = None
             
             array_suffix = f"[{array_count}]" if array_count is not None else ""
-            result.append(f"\t{type_name} {field_name}{array_suffix};")
+            result.append(f"    {type_name} {field_name}{array_suffix};")
         else:
             if undefined_field_count is not None and undefined_field_type == type_name:
                 undefined_field_count += 1

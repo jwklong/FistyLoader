@@ -247,4 +247,7 @@ struct BallTemplateInfo {
     int laserGradientStart;
     int laserGradientEnd;
     int laserOverrideImage;
+    int field_0x4c85c[0xbb];
 };
+
+static_assert(sizeof(BallTemplateInfo) == 0x4cb48);
