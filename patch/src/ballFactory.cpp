@@ -7,7 +7,7 @@
 extern "C" {
 
 size_t getTemplateInfoOffset(int i) {
-    return i * sizeof(BallTemplateInfo);
+    return i * sizeof(BallTemplateInfoExt);
 }
 
 void ballDeserializeDebug(int ballType) {
@@ -26,4 +26,4 @@ void ballPartDeserializeDebug(const char* name) {
 }
 
 // explicitly instantiate getTemplateInfo
-template BallTemplateInfo* BallFactory<BallTemplateInfo>::getTemplateInfo(int typeEnum);
+template BallTemplateInfoExt* BallFactory<BallTemplateInfoExt>::getTemplateInfo(int typeEnum);

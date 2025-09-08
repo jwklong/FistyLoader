@@ -132,6 +132,11 @@ ballfactory_init_hook:
 ; Hooks into BallFactory's constructor and modifies the amount of templateInfos
 ; to be initialized with BallTemplateInfo's constructor.
 ballfactory_constructor_hook1:
+    mov ecx, 1
+    call getTemplateInfoOffset
+    mov edx, eax
+    
+    mov rcx, rbx
     mov r8, qword [rel gooballCount]
     jmp ballfactory_constructor_hook1_return
 

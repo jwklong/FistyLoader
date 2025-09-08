@@ -33,8 +33,8 @@ hooks:
     byte_length: 5
   # BallFactory::BallFactory: mov r8d, 0x27
   ballfactory_constructor_hook1:
-    target_addr: 0x20e2cb
-    byte_length: 6
+    target_addr: 0x20e2c6
+    byte_length: 11
   # BallFactory::BallFactory: mov dword [rdi+0x8], 0x27
   ballfactory_constructor_hook2:
     target_addr: 0x20e2e6
@@ -49,7 +49,7 @@ hooks:
     byte_length: 7
   
   # BallFactory::getTemplateInfo(int typeEnum) (custom implementation)
-  _ZN11BallFactoryI16BallTemplateInfoE15getTemplateInfoEi:
+  _ZN11BallFactoryI19BallTemplateInfoExtE15getTemplateInfoEi:
     target_addr: 0x20e940
     byte_length: 5
   

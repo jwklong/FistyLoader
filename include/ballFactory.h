@@ -23,6 +23,11 @@ struct BallTemplateInfoExt {
     BallTemplateInfo base;
     
     ImageIdInfo editorButtonImageId;
+    
+public:
+    inline bool isInitialized() const {
+        return base.isInitialized();
+    }
 };
 
 extern "C" {
