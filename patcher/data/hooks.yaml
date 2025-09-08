@@ -41,7 +41,7 @@ hooks:
     byte_length: 7
   
   # BallFactory::getTemplateInfo(int typeEnum) (custom implementation)
-  _ZN11BallFactory15getTemplateInfoEi:
+  _ZN11BallFactoryI16BallTemplateInfoE15getTemplateInfoEi:
     target_addr: 0x20e940
     byte_length: 5
   

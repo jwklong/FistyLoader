@@ -3,15 +3,16 @@
 #include "wog2/misc.h"
 #include "wog2/templateInfo.h"
 
+template<typename TemplateInfo>
 struct BallFactory {
 public:
     virtual void destructorWorkaround();
     
-    BallTemplateInfo* getTemplateInfo(int typeEnum);
-    BallTemplateInfo* getTemplateInfo(const std::string& id);
+    TemplateInfo* getTemplateInfo(int typeEnum);
+    TemplateInfo* getTemplateInfo(const std::string& id);
     
 private:
-    BallTemplateInfo* m_templateInfos;
+    TemplateInfo* m_templateInfos;
     int m_ballCount;
     
     // originally, there would be a static array here

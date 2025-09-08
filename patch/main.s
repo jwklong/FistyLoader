@@ -28,7 +28,6 @@ extern get_template_info_start_hook_return
 
 extern initBallTable
 extern getTemplateInfoOffset
-extern getTemplateInfoError
 
 section .fisty
 
