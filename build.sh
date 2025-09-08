@@ -5,14 +5,19 @@ assemble() {
 }
 
 compile() {
+    CFLAGS="-c -I include -mabi=ms -O2 -fno-stack-protector"
     if [ "$ENABLE_LOGGING" == 1 ]; then
-        CFLAGS="-D ENABLE_LOGGING"
+        CFLAGS="$CFLAGS -D ENABLE_LOGGING"
     fi
-    gcc -c -I include -mabi=ms -O2 -fno-stack-protector $CFLAGS -o patch/build/ballTable.o patch/src/ballTable.cpp
+    
+    gcc $CFLAGS -o patch/build/ballTable.o patch/src/ballTable.cpp &
+    gcc $CFLAGS -o patch/build/ballFactory.o patch/src/ballFactory.cpp &
+    wait
 }
 
 link() {
-    ld -o patch/build/custom_code.o --oformat elf64-x86-64 -T main.ld patch/build/main.o patch/build/ballTable.o
+    INPUT_FILES="patch/build/main.o patch/build/ballTable.o patch/build/ballFactory.o"
+    ld -o patch/build/custom_code.o --oformat elf64-x86-64 -T main.ld $INPUT_FILES
 }
 
 copy() {

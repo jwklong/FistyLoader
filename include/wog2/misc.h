@@ -12,6 +12,10 @@ public:
     T values[32];
 };
 
+namespace std {
+    class string {};
+}
+
 extern "C" {
     extern const char* gooballIds[0x27];
     

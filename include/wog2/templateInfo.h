@@ -18,6 +18,10 @@ struct BallAttenuationFunctionInfo {
     int field_0x9c;
 };
 
+struct ImageIdInfo {
+    char imageId[0x40];
+};
+
 // Exported from Ghidra
 // TODO: improve documentation on some things
 struct BallTemplateInfo {
@@ -159,18 +163,18 @@ struct BallTemplateInfo {
     int strandType;
     float field_0x538[14];
     bool field_0x570[7];
-    char strandImageId[64];
-    char strandInactiveImageId[64];
-    char strandInactiveOverlayImageId[64];
+    ImageIdInfo strandImageId;
+    ImageIdInfo strandInactiveImageId;
+    ImageIdInfo strandInactiveOverlayImageId;
     char field_0x637;
     float field_0x638[2];
     char field_0x640[64];
-    char strandBurntImageId[64];
-    char strandBackgroundImageId[64];
-    char detachStrandImageId[64];
+    ImageIdInfo strandBurntImageId;
+    ImageIdInfo strandBackgroundImageId;
+    ImageIdInfo detachStrandImageId;
     float field_0x740;
-    char dragMarkerImageId[64];
-    char detachMarkerImageId[64];
+    ImageIdInfo dragMarkerImageId;
+    ImageIdInfo detachMarkerImageId;
     float markerRotSpeed;
     int stainLiquidType;
     int field_0x7cc;
@@ -246,8 +250,13 @@ struct BallTemplateInfo {
     int field_0x4c84c;
     int laserGradientStart;
     int laserGradientEnd;
-    int laserOverrideImage;
-    int field_0x4c85c[0xbb];
+    ImageIdInfo laserOverrideImage;
+    int field_0x4c898[0xac];
+    
+public:
+    inline bool isInitialized() const {
+        return name[0] != '\0';
+    }
 };
 
 static_assert(sizeof(BallTemplateInfo) == 0x4cb48);

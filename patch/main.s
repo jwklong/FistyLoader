@@ -24,8 +24,11 @@ extern get_gooball_name_hook2_return
 extern set_state_from_item_hook_return
 extern set_state_from_ball_hook_return
 extern try_shoot_ball_hook_return
+extern get_template_info_start_hook_return
 
 extern initBallTable
+extern getTemplateInfoOffset
+extern getTemplateInfoError
 
 section .fisty
 
@@ -101,10 +104,8 @@ ballfactory_start_hook:
 ; Hooks into BallFactory::load during the loop to make it calculate
 ; the offset into this->templateInfos without r14.
 ballfactory_loop_hook:
-    ; this fucking sucks, I assumed multiplication would not be this stupid
-    mov rax, rdi
-    mov rcx, 0x4cb48
-    mul rcx
+    mov ecx, edi
+    call getTemplateInfoOffset
     
     add rbx, rax
     mov rdx, rbx
@@ -116,9 +117,8 @@ ballfactory_loop_hook:
 ; Hooks into BallFactory::init and modifies BallFactory's allocation size
 ; to be dynamically determined by gooballCount.
 ballfactory_init_hook:
-    mov rax, 0x4cb48 ; = sizeof(BallTemplateInfo)
-    mov rcx, qword [rel gooballCount] ; = gooballCount
-    mul rcx
+    mov ecx, dword [rel gooballCount] ; = gooballCount
+    call getTemplateInfoOffset
     
     lea rcx, [rax+0x18]
     jmp ballfactory_init_hook_return
@@ -141,6 +141,19 @@ ballfactory_constructor_hook2:
     mov rdx, qword [rel gooballCount]
     mov dword [rdi+0x8], edx
     jmp ballfactory_constructor_hook2_return
+
+
+; get_template_info_start_hook
+; 
+; Hooks into BallFactory::getTemplateInfo and replaces the templateInfos
+; array index with my own getTemplateInfoOffset function, in order to
+; unhardcode the BallTemplateInfo size
+get_template_info_start_hook:
+    mov ecx, r9d
+    call getTemplateInfoOffset
+    mov r10, rax
+    
+    jmp get_template_info_start_hook_return
 
 
 ; get_template_info_hook

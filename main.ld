@@ -32,6 +32,7 @@ get_gooball_name_hook2_return = 0x27b740;
 set_state_from_item_hook_return = 0x2c8887;
 set_state_from_ball_hook_return = 0x2c7e67;
 try_shoot_ball_hook_return = 0x2db790;
+get_template_info_start_hook_return = 0x20e8ca;
 
 SECTIONS
 {
