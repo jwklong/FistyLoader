@@ -33,6 +33,8 @@ set_state_from_item_hook_return = 0x2c8887;
 set_state_from_ball_hook_return = 0x2c7e67;
 try_shoot_ball_hook_return = 0x2db790;
 get_template_info_start_hook_return = 0x20e8ca;
+ball_deserialize_print_hook_return = 0x21401b;
+ball_part_deserialize_hook_return = 0x2169c4;
 
 SECTIONS
 {

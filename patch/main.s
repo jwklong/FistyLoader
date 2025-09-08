@@ -25,9 +25,13 @@ extern set_state_from_item_hook_return
 extern set_state_from_ball_hook_return
 extern try_shoot_ball_hook_return
 extern get_template_info_start_hook_return
+extern ball_deserialize_print_hook_return
+extern ball_part_deserialize_hook_return
 
 extern initBallTable
 extern getTemplateInfoOffset
+extern ballDeserializeDebug
+extern ballPartDeserializeDebug
 
 section .fisty
 
@@ -177,6 +181,39 @@ create_objects_hook:
     pxor xmm3, xmm3
     cvtsi2ss xmm3, ecx
     jmp create_objects_hook_return
+
+
+; ball_deserialize_print_hook
+;
+; Hooks into BallTemplateInfoUtils::Deserialize and prints the gooball name
+ball_deserialize_print_hook:
+    push rcx
+    push rdx
+    push rax
+    sub rsp, 0x28
+    
+    call ballDeserializeDebug
+    
+    add rsp, 0x28
+    pop rax
+    pop rdx
+    pop rcx
+    
+    movsxd r8,ecx
+    mov rdi,rdx
+    jmp ball_deserialize_print_hook_return
+
+
+; ball_part_deserialize_hook
+;
+; Hooks into GetBallPartTemplateInfo and prints the part name
+ball_part_deserialize_hook:
+    mov rcx, rbx
+    call ballPartDeserializeDebug
+    
+    lea rcx, [rbx+0x40]
+    mov rdx, rdi
+    jmp ball_part_deserialize_hook_return
 
 
 ; ball_deserialize_hook

@@ -32,7 +32,7 @@ public:
     virtual UNK_RETURN getTime();
     virtual UNK_RETURN getPreciseTime();
     virtual UNK_RETURN getPreciseTime2(); // what is this??
-    virtual UNK_RETURN sleep();
+    virtual void sleep(int milliseconds);
     virtual UNK_RETURN getGraphics();
     virtual UNK_RETURN getVsync();
     virtual UNK_RETURN createTriStrip();

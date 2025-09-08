@@ -6,6 +6,14 @@ hooks:
     byte_length: 5
   
   # Loading of custom gooballs
+  # BallTemplateInfoUtils::Deserialize
+  ball_deserialize_print_hook:
+    target_addr: 0x214015
+    byte_length: 6
+  # GetBallPartTemplateInfo
+  ball_part_deserialize_hook:
+    target_addr: 0x2169bd
+    byte_length: 7
   # BallTemplateInfoUtils::Deserialize: lea rax, [gooBallIds]
   ball_deserialize_hook:
     target_addr: 0x21402f

@@ -4,6 +4,11 @@
 #include "ballTable.h"
 #include "log.h"
 
+#ifdef ENABLE_LOGGING
+Storage* printStorage;
+FileHandle printHandle;
+#endif
+
 extern "C" {
 
 enum class ReadLineResult {
@@ -40,6 +45,7 @@ void initBallTable() {
     FileHandle handle;
     storage->FileOpen("log.txt", 0x22, &handle);
     initPrint(storage, handle);
+    print("Test\n");
 #endif
     
     if (storage->FileExists(ballTablePath)) {

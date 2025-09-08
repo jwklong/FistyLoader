@@ -4,14 +4,15 @@
 
 #include "wog2/environment.h"
 
-Storage* printStorage;
-FileHandle printHandle;
+extern Storage* printStorage;
+extern FileHandle printHandle;
 
 inline void initPrint(Storage* storage, FileHandle handle) {
     printStorage = storage;
     printHandle = handle;
 }
 
+// TODO: rewrite this as a C vararg
 template<typename... Ts>
 void print(const char* fmt, Ts... args) {
     char buffer[0x80];
