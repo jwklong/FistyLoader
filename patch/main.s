@@ -6,27 +6,7 @@ extern Environment_instance
 
 extern gooballIds
 
-extern loading_screen_hook_return
-extern loading_screen_draw_hook_return
-extern load_config_hook_return
-extern eolgizmo_hook_return
-extern ballfactory_start_hook_return
-extern ballfactory_loop_hook_return
-extern ballfactory_init_hook_return
-extern ballfactory_constructor_hook1_return
-extern ballfactory_constructor_hook2_return
-extern get_template_info_hook_return
-extern create_objects_hook_return
-extern ball_deserialize_hook_return
-extern itempipein_spawnball_hook_return
-extern get_gooball_name_hook1_return
-extern get_gooball_name_hook2_return
-extern set_state_from_item_hook_return
-extern set_state_from_ball_hook_return
-extern try_shoot_ball_hook_return
-extern get_template_info_start_hook_return
-extern ball_deserialize_print_hook_return
-extern ball_part_deserialize_hook_return
+%include "patch/build/hook_returns.inc.s"
 
 extern initBallTable
 extern getTemplateInfoOffset

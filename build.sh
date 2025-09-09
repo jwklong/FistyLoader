@@ -1,10 +1,12 @@
 #!/bin/bash
-assemble() {
-    mkdir -p patch/build
-    nasm patch/main.s -f elf64 -o patch/build/main.o
+preprocess() {
+    python3 patcher/preprocess_hooks.py
 }
 
 compile() {
+    mkdir -p patch/build
+    nasm patch/main.s -f elf64 -o patch/build/main.o &
+    
     CFLAGS="-c -I include -mabi=ms -O2 -fno-stack-protector"
     if [ "$ENABLE_LOGGING" == 1 ]; then
         CFLAGS="$CFLAGS -D ENABLE_LOGGING"
@@ -25,4 +27,4 @@ copy() {
     objcopy patch/build/custom_code.o --only-keep-debug patcher/custom_code_symbols.o
 }
 
-assemble && compile && link && copy && python3 patcher/main.py "$1"
+preprocess && compile && link && copy && python3 patcher/main.py "$1"

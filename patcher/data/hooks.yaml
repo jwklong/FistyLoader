@@ -91,10 +91,10 @@ hooks:
   # ItemPropertiesGizmo::setStateFromItem: lea r9, [gooBallIds] + [...] + mov r8d, 0x26
   set_state_from_item_hook:
     target_addr: 0x2c8872
-    byte_length: 7 #?
+    byte_length: 21
   # ItemPropertiesGizmo::setStateFromBall: lea r9, [gooBallIds] + [...] + mov r8d, 0x26
   set_state_from_ball_hook:
     target_addr: 0x2c7e53
-    byte_length: 7 #?
+    byte_length: 20
 
   
