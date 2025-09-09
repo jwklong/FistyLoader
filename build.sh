@@ -27,4 +27,5 @@ copy() {
     objcopy patch/build/custom_code.o --only-keep-debug patcher/custom_code_symbols.o
 }
 
+pip install -r requirements.txt
 preprocess && compile && link && copy
