@@ -28,11 +28,6 @@ jobs:
       with:
         name: "custom_code_symbols"
         path: "patcher/custom_code_symbols.o"
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: "hooks"
-        path: "patcher/data/hooks.yml"
 
   two:
     runs-on: windows-latest
@@ -55,11 +50,6 @@ jobs:
       with:
         name: "custom_code_symbols"
         path: "patcher/"
-    - name: Download artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: "hooks"
-        path: "patcher/data/"
     - name: Build Installer
       run: "sh build_installer.sh"
     - name: Upload a Build Artifact
