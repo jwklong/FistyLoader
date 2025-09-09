@@ -6,18 +6,18 @@ hooks:
     byte_length: 5
   
   # Loading of custom gooballs
-  # BallTemplateInfoUtils::Deserialize
-  ball_deserialize_print_hook:
+  # BallTemplateInfoUtils::Deserialize: lea rax, [gooBallIds]
+  ball_deserialize_start_hook:
     target_addr: 0x214015
     byte_length: 6
-  # GetBallPartTemplateInfo
-  ball_part_deserialize_hook:
-    target_addr: 0x2169bd
-    byte_length: 7
   # BallTemplateInfoUtils::Deserialize: lea rax, [gooBallIds]
   ball_deserialize_hook:
     target_addr: 0x21402f
     byte_length: 7
+  # BallTemplateInfoUtils::Deserialize: lea rax, [gooBallIds]
+  ball_deserialize_hook2:
+    target_addr: 0x215f45
+    byte_length: 8
   
   # BallFactory::load (before loop)
   ballfactory_start_hook:
@@ -96,5 +96,3 @@ hooks:
   set_state_from_ball_hook:
     target_addr: 0x2c7e53
     byte_length: 20
-
-  

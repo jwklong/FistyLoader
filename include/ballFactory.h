@@ -27,4 +27,5 @@ struct BallTemplateInfoExt : public BallTemplateInfo {
 
 extern "C" {
     size_t getTemplateInfoOffset(int i);
+    bool BallTemplateInfo_deserializeExt(BallTemplateInfoExt* info, int ballType, const cJSON* json);
 }

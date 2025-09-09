@@ -3,15 +3,17 @@ BITS 64
 extern SDL_ShowSimpleMessageBox
 extern FileSystemUtils_CreateDir
 extern Environment_instance
+extern BallTemplateInfo_deserialize
 
 extern gooballIds
 
 %include "patch/build/hook_returns.inc.s"
 
+extern ball_deserialize_hook2_return_error
+
 extern initBallTable
 extern getTemplateInfoOffset
-extern ballDeserializeDebug
-extern ballPartDeserializeDebug
+extern BallTemplateInfo_deserializeExt
 
 section .fisty
 
@@ -19,6 +21,9 @@ global customGooballIds
 global gooballCount
 customGooballIds dq 0
 gooballCount dq 0
+
+; BallTemplateInfoUtils::Deserialize
+_ballType dd 0
 
 ; load_config_hook
 ; 
@@ -168,37 +173,17 @@ create_objects_hook:
     jmp create_objects_hook_return
 
 
-; ball_deserialize_print_hook
+; ball_deserialize_start_hook
 ;
-; Hooks into BallTemplateInfoUtils::Deserialize and prints the gooball name
-ball_deserialize_print_hook:
-    push rcx
-    push rdx
-    push rax
-    sub rsp, 0x28
+; Hooks into BallTemplateInfoUtils::Deserialize and
+; stores ballType in the global _ballType var
+ball_deserialize_start_hook:
+    mov dword [rel _ballType], ecx ; int ballType
     
-    call ballDeserializeDebug
-    
-    add rsp, 0x28
-    pop rax
-    pop rdx
-    pop rcx
-    
+    ; original code
     movsxd r8,ecx
     mov rdi,rdx
-    jmp ball_deserialize_print_hook_return
-
-
-; ball_part_deserialize_hook
-;
-; Hooks into GetBallPartTemplateInfo and prints the part name
-ball_part_deserialize_hook:
-    mov rcx, rbx
-    call ballPartDeserializeDebug
-    
-    lea rcx, [rbx+0x40]
-    mov rdx, rdi
-    jmp ball_part_deserialize_hook_return
+    jmp ball_deserialize_start_hook_return
 
 
 ; ball_deserialize_hook
@@ -208,6 +193,26 @@ ball_part_deserialize_hook:
 ball_deserialize_hook:
     mov rax, [rel customGooballIds]
     jmp ball_deserialize_hook_return
+
+
+; ball_deserialize_hook
+;
+; Hooks into BallTemplateInfoUtils::Deserialize and extends the
+; deserializer with custom properties
+ball_deserialize_hook2:
+    mov rcx, rdi ; BallTemplateInfo(Ext)* info
+    mov rdx, [rel _ballType] ; int ballType
+    mov r8, rbx ; cJSON* json
+    call BallTemplateInfo_deserializeExt
+    
+    test rax, rax
+    je ball_deserialize_hook2_return_error
+    
+    ; original code
+    mov rcx,rdi
+    call BallTemplateInfo_deserialize
+    
+    jmp ball_deserialize_hook2_return
 
 
 ; itempipein_spawnball_hook

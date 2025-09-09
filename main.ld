@@ -8,13 +8,20 @@ strtol = 0x454d;
 strncpy = 0xaf0210;
 
 SDL_ShowSimpleMessageBox = 0x8944b0;
+cJSON_GetObjectItemCaseSensitive = 0x187f;
+cJSON_IsObject = 0x1d6c4;
+
 FileSystemUtils_CreateDir = 0x4667c0;
 Environment_instance = 0x41ec40;
+BallTemplateInfo_deserialize = 0x19213;
+GetImageIdInfo = 0x21d4d0;
 
 gooballIds = 0x12eede0;
 empty_string = 0xe8898e;
 
 INCLUDE patch/build/hook_returns.inc.ld
+
+ball_deserialize_hook2_return_error = 0x215f62;
 
 SECTIONS
 {
