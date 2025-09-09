@@ -28,6 +28,5 @@ copy() {
 }
 
 pip install -r requirements.txt
-touch patch/build/hook_returns.inc.s
-touch patch/build/hook_returns.inc.ld
+mkdir patch/build
 preprocess && compile && link && copy
