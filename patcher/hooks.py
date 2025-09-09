@@ -1,5 +1,23 @@
+from dataclasses import dataclass
 from io import BufferedRandom
 from elftools.elf.sections import SymbolTableSection
+
+@dataclass
+class Hook:
+    symbol_name: str
+    target_addr: int
+    byte_length: int
+    
+    @staticmethod
+    def from_dict(symbol_name: str, hook_dict: dict) -> 'Hook':
+        target_addr = hook_dict['target_addr']
+        assert isinstance(target_addr, int), f"'target_addr' field has to be an int ({symbol_name!r})"
+        
+        byte_length = hook_dict['byte_length']
+        assert isinstance(byte_length, int), f"'byte_length' field has to be an int ({symbol_name!r})"
+        assert byte_length >= 5, f"byte_length has to be at least 5 ({symbol_name!r})"
+        
+        return Hook(symbol_name, target_addr, byte_length)
 
 # from https://stackoverflow.com/a/36361832/10079808
 NOP_SEQUENCES = [
@@ -29,8 +47,7 @@ def hook_addr(file: BufferedRandom, virtual_address: int, target_address: int, *
     buf = bytes([0xe9, *relative_target_addr.to_bytes(4, 'little')])
     
     if padding > 0:
-        assert padding < len(NOP_SEQUENCES), f"Cannot add padding longer than {len(NOP_SEQUENCES) - 1}"
-        buf += NOP_SEQUENCES[padding]
+        buf += bytes([0]) * padding
     
     overwrite_bytes(file, virtual_address, buf)
 
@@ -47,14 +64,8 @@ def inject_hooks(file: BufferedRandom, symtab: SymbolTableSection, hooks: dict):
     
     # Hooks
     for symbol_name, args in hooks.items():
-        target_addr = args['target_addr']
-        assert isinstance(target_addr, int), f"'target_addr' field has to be an int ({symbol_name!r})"
-        
-        byte_length = args['byte_length']
-        assert isinstance(byte_length, int), f"'byte_length' field has to be an int ({symbol_name!r})"
-        assert byte_length >= 5, f"byte_length has to be at least 5 ({symbol_name!r})"
-        
-        hook_symbol(file, symtab, 0x140000000 | target_addr, symbol_name, padding=byte_length - 5)
+        hook = Hook.from_dict(symbol_name, args)
+        hook_symbol(file, symtab, 0x140000000 | hook.target_addr, symbol_name, padding=hook.byte_length - 5)
     
     # Direct asm patches
     # Skip SteamAPI (crashes)

@@ -7,9 +7,17 @@ hooks:
   
   # Loading of custom gooballs
   # BallTemplateInfoUtils::Deserialize: lea rax, [gooBallIds]
+  ball_deserialize_start_hook:
+    target_addr: 0x214015
+    byte_length: 6
+  # BallTemplateInfoUtils::Deserialize: lea rax, [gooBallIds]
   ball_deserialize_hook:
     target_addr: 0x21402f
     byte_length: 7
+  # BallTemplateInfoUtils::Deserialize: lea rax, [gooBallIds]
+  ball_deserialize_hook2:
+    target_addr: 0x215f45
+    byte_length: 8
   
   # BallFactory::load (before loop)
   ballfactory_start_hook:
@@ -25,16 +33,25 @@ hooks:
     byte_length: 5
   # BallFactory::BallFactory: mov r8d, 0x27
   ballfactory_constructor_hook1:
-    target_addr: 0x20e2cb
-    byte_length: 6
+    target_addr: 0x20e2c6
+    byte_length: 11
   # BallFactory::BallFactory: mov dword [rdi+0x8], 0x27
   ballfactory_constructor_hook2:
     target_addr: 0x20e2e6
     byte_length: 7
+  # BallFactory::getTemplateInfo: movsxd rax, r9d + imul r10, rax, 0x4cb48 (= sizeof(BallTemplateInfo))
+  get_template_info_start_hook:
+    target_addr: 0x20e8c0
+    byte_length: 10
   # BallFactory::getTemplateInfo: inc r9 + cmp r9, 0x27
   get_template_info_hook:
     target_addr: 0x20e8f7
     byte_length: 7
+  
+  # BallFactory::getTemplateInfo(int typeEnum) (custom implementation)
+  _ZN11BallFactoryI19BallTemplateInfoExtE15getTemplateInfoEi:
+    target_addr: 0x20e940
+    byte_length: 5
   
   # EOLGizmo::update: mov rbx, qword [r15+rcx*8+gooballIds]
   eolgizmo_hook:
@@ -74,10 +91,12 @@ hooks:
   # ItemPropertiesGizmo::setStateFromItem: lea r9, [gooBallIds] + [...] + mov r8d, 0x26
   set_state_from_item_hook:
     target_addr: 0x2c8872
-    byte_length: 7 #?
+    byte_length: 21
   # ItemPropertiesGizmo::setStateFromBall: lea r9, [gooBallIds] + [...] + mov r8d, 0x26
   set_state_from_ball_hook:
     target_addr: 0x2c7e53
-    byte_length: 7 #?
-
-  
+    byte_length: 20
+  # EditorElementUtils::Initialize: mov ecx, 1 + [...] (GetGooballName, Add)
+  editor_element_initialize_hook:
+    target_addr: 0x23b584
+    byte_length: 0x575

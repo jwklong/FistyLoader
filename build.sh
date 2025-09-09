@@ -1,11 +1,25 @@
-#!/bin/sh
-assemble() {
+#!/bin/bash
+preprocess() {
+    python3 patcher/preprocess_hooks.py
+}
+
+compile() {
     mkdir -p patch/build
-    nasm patch/main.s -f elf64 -o patch/build/main.o
+    nasm patch/main.s -f elf64 -o patch/build/main.o &
+    
+    CFLAGS="-c -I include -mabi=ms -O2 -fno-stack-protector"
+    if [ "$ENABLE_LOGGING" == 1 ]; then
+        CFLAGS="$CFLAGS -D ENABLE_LOGGING"
+    fi
+    
+    gcc $CFLAGS -o patch/build/ballTable.o patch/src/ballTable.cpp &
+    gcc $CFLAGS -o patch/build/ballFactory.o patch/src/ballFactory.cpp &
+    wait
 }
 
 link() {
-    ld -o patch/build/custom_code.o --oformat elf64-x86-64 patch/build/main.o -T main.ld
+    INPUT_FILES="patch/build/main.o patch/build/ballTable.o patch/build/ballFactory.o"
+    ld -o patch/build/custom_code.o --oformat elf64-x86-64 -T main.ld $INPUT_FILES
 }
 
 copy() {
@@ -13,4 +27,4 @@ copy() {
     objcopy patch/build/custom_code.o --only-keep-debug patcher/custom_code_symbols.o
 }
 
-assemble && link && copy
+preprocess && compile && link && copy

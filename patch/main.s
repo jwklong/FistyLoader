@@ -3,39 +3,35 @@ BITS 64
 extern SDL_ShowSimpleMessageBox
 extern FileSystemUtils_CreateDir
 extern Environment_instance
+extern BallTemplateInfo_deserialize
 
 extern gooballIds
 
-extern loading_screen_hook_return
-extern loading_screen_draw_hook_return
-extern load_config_hook_return
-extern eolgizmo_hook_return
-extern ballfactory_start_hook_return
-extern ballfactory_loop_hook_return
-extern ballfactory_init_hook_return
-extern ballfactory_constructor_hook1_return
-extern ballfactory_constructor_hook2_return
-extern get_template_info_hook_return
-extern create_objects_hook_return
-extern ball_deserialize_hook_return
-extern itempipein_spawnball_hook_return
-extern get_gooball_name_hook1_return
-extern get_gooball_name_hook2_return
-extern set_state_from_item_hook_return
-extern set_state_from_ball_hook_return
-extern try_shoot_ball_hook_return
+%include "patch/build/hook_returns.inc.s"
+
+extern ball_deserialize_hook2_return_error
+
+extern initBallTable
+extern getTemplateInfoOffset
+extern BallTemplateInfo_deserializeExt
+extern addGooballButtons
 
 section .fisty
 
+global customGooballIds
+global gooballCount
 customGooballIds dq 0
 gooballCount dq 0
+
+; BallTemplateInfoUtils::Deserialize
+_ballType dd 0
 
 ; load_config_hook
 ; 
 ; Hooks into SDL2Environment::loadConfig to generate the fisty/ballTable.ini file
 ; if it doesn't already exist or load the file if it does.
 load_config_hook:
-    push rbx
+    ; push rbx
     push rcx
     push rdx
     push rbp
@@ -43,40 +39,17 @@ load_config_hook:
     push r9
     push r10
     push r11
-    push r12
+    ; push r12
     
     mov rbp, rsp
     sub rsp, 64 + 128
     
-    ; FileSystemUtils::CreateDir
-    lea rcx, [rel fistyPath]
-    call FileSystemUtils_CreateDir
-    
-    ; Environment::instance
-    call Environment_instance
-    
-    ; Environment::getStorage (vtable[0x28])
-    mov rdx, qword [rax] ; rdx = env->vtable
-    mov rcx, rax
-    call qword [rdx + 0x150]
-    mov rbx, rax ; rbx = SDL2Storage* storage
-    
-    ; SDL2Storage::FileExists (vtable[1])
-    ; I'm just going to ignore the TOCTOU "vulnerability" here
-    mov r12, qword [rbx] ; r12 = storage->vtable
-    mov rcx, rbx ; this
-    lea rdx, [rel ballTablePath] ; filePath
-    call qword [r12+0x8]
-    test al, al
-    je load_config_hook_create_balltable ; skip the following code if ballTable.ini exists already and load the config instead
-    
-    ; storage passed in as rbx
-    call load_ball_table
+    ; TODO: which registers does this clobber? (so i can get rid of some of the pushes and pops)
+    call initBallTable
 
-load_config_hook_merge:
     add rsp, 64 + 128
     
-    pop r12
+    ; pop r12
     pop r11
     pop r10
     pop r9
@@ -84,30 +57,11 @@ load_config_hook_merge:
     pop rbp
     pop rdx
     pop rcx
-    pop rbx
+    ; pop rbx
     
     ; softbranch
     mov qword [rsp+8], rbx
     jmp load_config_hook_return
-
-load_config_hook_create_balltable:
-    ; load vanilla gooball table into custom table
-    lea rax, [rel gooballIds]
-    mov qword [rel customGooballIds], rax
-    mov qword [rel gooballCount], baseGooballCount
-    
-    ; Generate the config file
-    call create_ball_table
-    test rax, rax
-    je load_config_hook_merge
-    
-    ; SDL_ShowSimpleMessageBox
-    mov ecx, 0x40
-    lea rdx, [rel msgTitle]
-    lea r8, [rel msgBallTableCreateSuccess]
-    xor r9, r9
-    call SDL_ShowSimpleMessageBox
-    jmp load_config_hook_merge
 
 
 ; eolgizmo_hook
@@ -139,10 +93,8 @@ ballfactory_start_hook:
 ; Hooks into BallFactory::load during the loop to make it calculate
 ; the offset into this->templateInfos without r14.
 ballfactory_loop_hook:
-    ; this fucking sucks, I assumed multiplication would not be this stupid
-    mov rax, rdi
-    mov rcx, 0x4cb48
-    mul rcx
+    mov ecx, edi
+    call getTemplateInfoOffset
     
     add rbx, rax
     mov rdx, rbx
@@ -154,9 +106,8 @@ ballfactory_loop_hook:
 ; Hooks into BallFactory::init and modifies BallFactory's allocation size
 ; to be dynamically determined by gooballCount.
 ballfactory_init_hook:
-    mov rax, 0x4cb48 ; = sizeof(BallTemplateInfo)
-    mov rcx, qword [rel gooballCount] ; = gooballCount
-    mul rcx
+    mov ecx, dword [rel gooballCount] ; = gooballCount
+    call getTemplateInfoOffset
     
     lea rcx, [rax+0x18]
     jmp ballfactory_init_hook_return
@@ -167,6 +118,11 @@ ballfactory_init_hook:
 ; Hooks into BallFactory's constructor and modifies the amount of templateInfos
 ; to be initialized with BallTemplateInfo's constructor.
 ballfactory_constructor_hook1:
+    mov ecx, 1
+    call getTemplateInfoOffset
+    mov edx, eax
+    
+    mov rcx, rbx
     mov r8, qword [rel gooballCount]
     jmp ballfactory_constructor_hook1_return
 
@@ -179,6 +135,19 @@ ballfactory_constructor_hook2:
     mov rdx, qword [rel gooballCount]
     mov dword [rdi+0x8], edx
     jmp ballfactory_constructor_hook2_return
+
+
+; get_template_info_start_hook
+; 
+; Hooks into BallFactory::getTemplateInfo and replaces the templateInfos
+; array index with my own getTemplateInfoOffset function, in order to
+; unhardcode the BallTemplateInfo size
+get_template_info_start_hook:
+    mov ecx, r9d
+    call getTemplateInfoOffset
+    mov r10, rax
+    
+    jmp get_template_info_start_hook_return
 
 
 ; get_template_info_hook
@@ -205,6 +174,19 @@ create_objects_hook:
     jmp create_objects_hook_return
 
 
+; ball_deserialize_start_hook
+;
+; Hooks into BallTemplateInfoUtils::Deserialize and
+; stores ballType in the global _ballType var
+ball_deserialize_start_hook:
+    mov dword [rel _ballType], ecx ; int ballType
+    
+    ; original code
+    movsxd r8,ecx
+    mov rdi,rdx
+    jmp ball_deserialize_start_hook_return
+
+
 ; ball_deserialize_hook
 ;
 ; Hooks into BallTemplateInfoUtils::Deserialize and
@@ -212,6 +194,26 @@ create_objects_hook:
 ball_deserialize_hook:
     mov rax, [rel customGooballIds]
     jmp ball_deserialize_hook_return
+
+
+; ball_deserialize_hook
+;
+; Hooks into BallTemplateInfoUtils::Deserialize and extends the
+; deserializer with custom properties
+ball_deserialize_hook2:
+    mov rcx, rdi ; BallTemplateInfo(Ext)* info
+    mov rdx, [rel _ballType] ; int ballType
+    mov r8, rbx ; cJSON* json
+    call BallTemplateInfo_deserializeExt
+    
+    test rax, rax
+    je ball_deserialize_hook2_return_error
+    
+    ; original code
+    mov rcx,rdi
+    call BallTemplateInfo_deserialize
+    
+    jmp ball_deserialize_hook2_return
 
 
 ; itempipein_spawnball_hook
@@ -287,15 +289,18 @@ try_shoot_ball_hook:
     jmp try_shoot_ball_hook_return
 
 
-%include "patch/ini_extract.s"
-%include "patch/ini_parse.s"
+; editor_element_initialize_hook
+; 
+; Hooks into EditorElementUtils::Initialize and unhardcodes the gooball
+; image editor buttons
+editor_element_initialize_hook:
+    call addGooballButtons
+    
+    jmp editor_element_initialize_hook_return
+
 
 ; constants
 msgTitle db "Fisty Loader", 00h
-msgBallTableCreateSuccess db \
-    "Successfully extracted assets from exe file into 'World of Goo 2 (current installation's game directory)/game/fisty'", 00h
-
-fistyPath db "fisty", 00h
 ballTablePath db "fisty/ballTable.ini", 00h
 
 baseGooballCount equ 39

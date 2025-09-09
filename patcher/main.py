@@ -70,7 +70,8 @@ def dev_main():
         print('out.exe exists already, only applying changes...')
     
     symbols = ELFFile(BytesIO(symbols_bin))
-    symtab: SymbolTableSection = symbols.get_section_by_name(".symtab")
+    symtab = symbols.get_section_by_name(".symtab")
+    assert isinstance(symtab, SymbolTableSection)
     
     hooks = yaml.safe_load(hooks_str)['hooks']
     
