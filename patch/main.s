@@ -14,6 +14,7 @@ extern ball_deserialize_hook2_return_error
 extern initBallTable
 extern getTemplateInfoOffset
 extern BallTemplateInfo_deserializeExt
+extern addGooballButtons
 
 section .fisty
 
@@ -286,6 +287,17 @@ set_state_from_ball_hook:
 try_shoot_ball_hook:
     mov rdx, [rel customGooballIds]
     jmp try_shoot_ball_hook_return
+
+
+; editor_element_initialize_hook
+; 
+; Hooks into EditorElementUtils::Initialize and unhardcodes the gooball
+; image editor buttons
+editor_element_initialize_hook:
+    call addGooballButtons
+    
+    jmp editor_element_initialize_hook_return
+
 
 ; constants
 msgTitle db "Fisty Loader", 00h

@@ -12,6 +12,15 @@ size_t getTemplateInfoOffset(int i) {
     return i * sizeof(BallTemplateInfoExt);
 }
 
+// in the same order as the default gooball buttons
+static int defaultGooballButtons[] = {
+    1, 2, 4, 0xb, 3, 0x11, 6, 8, 0xe, 0xc, 7, 0xd,
+    9, 0x10, 0x17, 0x19, 0x1a, 0xf, 0x20, 0x21, 5,
+    0x22, 0x23, 0x25, 0x12, 0x26, 0x13, 0x1b, 0x1c,
+};
+
+static int defaultUnusedGooballButtons[] = { 10, 20, 29, 30 };
+
 static const char* defaultEditorButtonImage(int ballType) {
     switch (ballType) {
         case 1:    return "IMAGE_EDITOR_UI_BALLCOMMON";
@@ -69,6 +78,35 @@ bool BallTemplateInfo_deserializeExt(BallTemplateInfoExt* info, int ballType, co
 #endif
     
     return true;
+}
+
+static void tryAddButton(BallFactory<BallTemplateInfoExt>* ballFactory, int typeEnum) {
+    BallTemplateInfoExt* info = ballFactory->getTemplateInfoUnchecked(typeEnum);
+    if (info == nullptr)
+        return;
+    
+    const char* editorButtonImageId = info->editorButtonImageId.imageId;
+    if (editorButtonImageId[0] == '\0')
+        return;
+    
+    const char* gooballName = GetGooBallName(typeEnum);
+    AddGooballButton(gooballName, 0, 1, typeEnum, editorButtonImageId, 0);
+}
+
+void addGooballButtons() {
+    BallFactory<BallTemplateInfoExt>* ballFactory = BallFactory<BallTemplateInfoExt>::instance();
+    
+    for (int i : defaultGooballButtons) {
+        tryAddButton(ballFactory, i);
+    }
+    
+    for (int i : defaultUnusedGooballButtons) {
+        tryAddButton(ballFactory, i);
+    }
+    
+    for (int i = BASE_GOOBALL_COUNT; i < gooballCount; i++) {
+        tryAddButton(ballFactory, i);
+    }
 }
 
 }

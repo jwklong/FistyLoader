@@ -21,6 +21,15 @@ inline TemplateInfo* BallFactory<TemplateInfo>::getTemplateInfo(int typeEnum) {
     return &m_templateInfos[typeEnum];
 }
 
+template <typename TemplateInfo>
+inline TemplateInfo* BallFactory<TemplateInfo>::getTemplateInfoUnchecked(int typeEnum) {
+    if (typeEnum < 0 || typeEnum >= gooballCount || !m_templateInfos[typeEnum].isInitialized()) {
+        return nullptr;
+    }
+    
+    return &m_templateInfos[typeEnum];
+}
+
 struct BallTemplateInfoExt : public BallTemplateInfo {
     ImageIdInfo editorButtonImageId;
 };
@@ -28,4 +37,5 @@ struct BallTemplateInfoExt : public BallTemplateInfo {
 extern "C" {
     size_t getTemplateInfoOffset(int i);
     bool BallTemplateInfo_deserializeExt(BallTemplateInfoExt* info, int ballType, const cJSON* json);
+    void addGooballButtons();
 }

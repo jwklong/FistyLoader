@@ -1,6 +1,7 @@
 #include "wog2/misc.h"
 #include "wog2/environment.h"
 #include "wog2/templateInfo.h"
+#include "wog2/ballFactory.h"
 #include "ballTable.h"
 #include "log.h"
 
@@ -24,8 +25,6 @@ static ReadLineResult readLine(const char* inputFile, int& i, int fileSize,
 static void fixBallTable(Storage* storage, const char* inputFile, int fileSize, int lineNumber);
 static char skipSpaces(const char* inputFile, int& i, int fileSize);
 static int readWord(const char* inputFile, int& i, int fileSize, const char*& result);
-
-#define BASE_GOOBALL_COUNT 39
 
 const char ballTablePath[] = "fisty/ballTable.ini";
 

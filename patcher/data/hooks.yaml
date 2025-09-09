@@ -96,3 +96,7 @@ hooks:
   set_state_from_ball_hook:
     target_addr: 0x2c7e53
     byte_length: 20
+  # EditorElementUtils::Initialize: mov ecx, 1 + [...] (GetGooballName, Add)
+  editor_element_initialize_hook:
+    target_addr: 0x23b584
+    byte_length: 0x575
