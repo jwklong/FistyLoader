@@ -18,7 +18,6 @@ fi
 
 pip install -r requirements.txt
 
-nasm patch/main.s -o patcher/custom_code.bin
-pyinstaller -F patcher/install.py --add-data patcher/custom_code.bin:. --recursive-copy-metadata readchar --clean
+pyinstaller -F patcher/install.py --add-data patcher/custom_code.bin:. --add-data patcher/custom_code_symbols.o:. --add-data patcher/data/hooks.yaml:. --recursive-copy-metadata readchar --clean
 
 echo Done.
