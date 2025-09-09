@@ -16,6 +16,44 @@ def write_undefined_field(out_lines: list[str], field_name: str | None, field_si
     else:
         out_lines.append(f"    {INT_TYPES[field_size - 1]} {field_name};")
 
+def remove_padding_after_bools(lines: list[str]) -> list[str]:
+    result: list[str] = []
+    
+    following_bool: bool = False
+    
+    for line in lines:
+        if line == "};":
+            result.append(line)
+            return result
+        
+        match = STATEMENT_REGEX.match(line)
+        if match is None:
+            print("line without statement:", line)
+            continue
+        
+        type_name, field_name, array_count = match.groups()
+        
+        # remove leading 'struct' because this isn't C
+        if type_name.startswith('struct '):
+            type_name = type_name[7:]
+        # more modern pointer style
+        type_name = type_name.replace(' *', '*')
+        
+        # on unnamed undefined fields, disable following_bool if aligned by 4
+        match = UNNAMED_FIELD_REGEX.match(field_name)
+        if match is not None and type_name.startswith('undefined'):
+            field_offset = int(match.group(1), 16)
+            if field_offset % 4 == 0:
+                following_bool = False
+        else:
+            following_bool = type_name == "bool"
+        
+        if not following_bool or match is None or not type_name.startswith('undefined'):
+            array_suffix = f"[{array_count}]" if array_count is not None else ""
+            result.append(f"    {type_name} {field_name}{array_suffix};")
+    
+    raise ValueError(f"Could not find end of struct {argv[1]}")
+
 def collapse_undefined(lines: list[str]) -> list[str]:
     result: list[str] = []
     
@@ -34,12 +72,6 @@ def collapse_undefined(lines: list[str]) -> list[str]:
             continue
         
         type_name, field_name, array_count = match.groups()
-        
-        # remove leading 'struct' because this isn't C
-        if type_name.startswith('struct '):
-            type_name = type_name[7:]
-        # more modern pointer style
-        type_name = type_name.replace(' *', '*')
         
         if not type_name.startswith('undefined') or array_count is not None:
             write_undefined_field(result, undefined_field, undefined_field_size)
@@ -138,8 +170,10 @@ def main():
     lines = input_file.splitlines()
     starting_line = lines.index(f"struct {argv[1]} {{")
     print(starting_line)
+    lines = lines[starting_line + 1:]
     
-    lines = collapse_undefined(lines[starting_line + 1:])
+    lines = remove_padding_after_bools(lines)
+    lines = collapse_undefined(lines)
     lines = collapse_unk_into_arrays(lines)
     
     lines.insert(0, f"struct {argv[1]} {{")

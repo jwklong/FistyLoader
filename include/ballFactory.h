@@ -4,6 +4,8 @@
 #include "wog2/ballFactory.h"
 #include "ballTable.h"
 
+// custom implementation of this function
+// to extend for error handling and unhardcode BallTemplateInfo size
 template <typename TemplateInfo>
 inline TemplateInfo* BallFactory<TemplateInfo>::getTemplateInfo(int typeEnum) {
     if (typeEnum < 0 || typeEnum >= gooballCount || !m_templateInfos[typeEnum].isInitialized()) {
@@ -19,15 +21,8 @@ inline TemplateInfo* BallFactory<TemplateInfo>::getTemplateInfo(int typeEnum) {
     return &m_templateInfos[typeEnum];
 }
 
-struct BallTemplateInfoExt {
-    BallTemplateInfo base;
-    
+struct BallTemplateInfoExt : public BallTemplateInfo {
     ImageIdInfo editorButtonImageId;
-    
-public:
-    inline bool isInitialized() const {
-        return base.isInitialized();
-    }
 };
 
 extern "C" {
