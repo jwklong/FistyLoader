@@ -69,7 +69,7 @@ def inject_hooks(file: BufferedRandom, symtab: SymbolTableSection, hooks: dict):
     
     # Direct asm patches
     # Skip SteamAPI
-    overwrite_bytes(file, 0x14041ae8a, NOP_SEQUENCES[6])
+    # overwrite_bytes(file, 0x14041ae8a, NOP_SEQUENCES[6])
     
     # BallFactory::load: add r14, 0x4cb48 + cmp edi, 0x27 -> 7-byte nop + cmp edi, r14d (unhardcode gooball cap)
     overwrite_bytes(file, 0x14020eab5, bytes([0x0F, 0x1F, 0x80, 0x00, 0x00, 0x00, 0x00, 0x44, 0x39, 0xf7]))
